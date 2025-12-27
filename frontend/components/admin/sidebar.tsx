@@ -21,9 +21,12 @@ export function Sidebar({ activeTab, onTabChange, onLogout, userName }: SidebarP
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-card">
-      <div className="border-b border-border p-6">
-        <h1 className="font-mono text-xl font-bold text-foreground">PharmaSys</h1>
-        <p className="text-xs text-muted-foreground">Admin Dashboard</p>
+      <div className="flex h-14 items-center gap-2 border-b bg-muted/40 px-6">
+        <LayoutDashboard className="size-6 text-primary" />
+        <div className="flex flex-col">
+          <h1 className="font-mono text-xl font-bold text-foreground">Jack-VET</h1>
+          <p className="text-[10px] text-muted-foreground">Admin Dashboard</p>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
@@ -37,7 +40,7 @@ export function Sidebar({ activeTab, onTabChange, onLogout, userName }: SidebarP
               className={cn(
                 "w-full justify-start gap-3 text-foreground",
                 activeTab === tab.id &&
-                  "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
+                "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
               )}
             >
               <Icon className="size-5" />
@@ -61,6 +64,6 @@ export function Sidebar({ activeTab, onTabChange, onLogout, userName }: SidebarP
           Logout
         </Button>
       </div>
-    </div>
+    </div >
   )
 }

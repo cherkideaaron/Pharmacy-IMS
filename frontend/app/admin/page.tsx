@@ -161,8 +161,8 @@ export default function AdminPage() {
         {activeTab === "overview" && (
           <div className="p-8 space-y-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Dashboard Overview</h1>
-              <p className="text-muted-foreground">Real-time pharmacy operations metrics</p>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">Overview</h2>
+              <p className="text-muted-foreground">Real-time veterinary operations metrics</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

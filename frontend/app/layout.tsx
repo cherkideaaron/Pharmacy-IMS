@@ -8,8 +8,8 @@ const geist = Geist({ subsets: ["latin"] })
 const geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "PharmaSys - Enterprise Inventory Management",
-  description: "Professional pharmacy inventory and point-of-sale system",
+  title: "Jack-VET - Enterprise Inventory Management",
+  description: "Professional veterinary inventory and point-of-sale system",
   generator: "v0.app",
   icons: {
     icon: [

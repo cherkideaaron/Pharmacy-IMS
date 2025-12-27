@@ -55,9 +55,9 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-md border-border bg-card p-8">
-      <div className="mb-8 space-y-2">
-        <h1 className="font-mono text-2xl font-bold tracking-tight text-foreground">PharmaSys</h1>
-        <p className="text-sm text-muted-foreground">Enterprise Inventory Management</p>
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="font-mono text-2xl font-bold tracking-tight text-foreground">Jack-VET</h1>
+        <p className="text-sm text-muted-foreground">Enter your credentials to access the system</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

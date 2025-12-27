@@ -8,9 +8,9 @@ import { ProductSearch } from "@/components/pos/product-search"
 import { Cart } from "@/components/pos/cart"
 import { CheckoutDialog } from "@/components/pos/checkout-dialog"
 import { useStore } from "@/lib/store"
+import { Store, LogOut, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { Product, Sale } from "@/lib/types"
-import { LogOut, User } from "lucide-react"
 
 interface CartItem {
   product: Product
@@ -152,7 +152,10 @@ export default function POSPage() {
       <header className="border-b border-black/10 bg-white px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-mono text-xl font-bold text-foreground">PharmaSys POS</h1>
+            <div className="flex items-center gap-2">
+              <Store className="size-6 text-primary" />
+              <h1 className="font-mono text-xl font-bold text-foreground">Jack-VET POS</h1>
+            </div>
             <p className="text-sm text-muted-foreground">Point of Sale Terminal</p>
           </div>
           <div className="flex items-center gap-4">

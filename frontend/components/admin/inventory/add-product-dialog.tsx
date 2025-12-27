@@ -61,6 +61,7 @@ export function AddProductDialog({ open, onClose, onSave }: AddProductDialogProp
       expiryDate: formData.expiryDate || new Date().toISOString(),
       batchNumber: formData.batchNumber || "",
       requiresPrescription: formData.requiresPrescription || false,
+      status: "active",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
