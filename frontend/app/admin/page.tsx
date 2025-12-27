@@ -33,6 +33,8 @@ export default function AdminPage() {
   const fetchSales = useStore((state) => state.fetchSales)
   const fetchAuditLogs = useStore((state) => state.fetchAuditLogs)
 
+  const deleteProduct = useStore((state) => state.deleteProduct)
+
   const [activeTab, setActiveTab] = useState("overview")
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -135,6 +137,22 @@ export default function AdminPage() {
     }
   }
 
+  const handleDeleteProduct = async (product: Product) => {
+    try {
+      await deleteProduct(product.id)
+      toast({
+        title: "Product deleted",
+        description: `${product.name} has been removed from inventory`,
+      })
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete product",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} userName={currentUser.name} />
@@ -199,6 +217,7 @@ export default function AdminPage() {
             <ProductTable
               products={products}
               onEditProduct={handleEditProduct}
+              onDeleteProduct={handleDeleteProduct}
               onAddProduct={() => setAddDialogOpen(true)}
             />
           </div>

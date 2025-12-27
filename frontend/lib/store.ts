@@ -22,6 +22,8 @@ interface AppState {
   products: Product[]
   addProduct: (product: Omit<Product, "id" | "createdAt" | "updatedAt">) => Promise<void>
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>
+
+  deleteProduct: (id: string) => Promise<void>
   updateStock: (id: string, quantity: number) => Promise<void>
 
   // Sales
@@ -118,6 +120,7 @@ export const useStore = create<AppState>((set, get) => ({
     const { data, error } = await supabase
       .from("products")
       .select("*")
+      .neq("status", "archived") // Filter out archived products
       .order("name")
 
     if (!error && data) {
@@ -143,6 +146,7 @@ export const useStore = create<AppState>((set, get) => ({
         batchNumber: p.batch_number,
         location: p.location,
         requiresPrescription: p.requires_prescription,
+        status: p.status,
         createdAt: p.created_at,
         updatedAt: p.updated_at
       }))
@@ -261,25 +265,7 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   updateStock: async (id, quantity) => {
-    // We can rely on the trigger for simple sales, but if we need manual adjustment:
-    // This action implies explicitly setting stock or reducing it? 
-    // The previous implementation was reducing stock.
-    // Let's assume this is for manual adjustments or consistent with previous behavior
-
-    // However, for consistency with the new Supabase trigger `reduce_stock_on_sale`,
-    // we might not need to call this manually during `addSale`.
-    // But if we use it for standalone stock updates:
-
-    // We'll implement it as a relative decrement for now to match previous logic, 
-    // or better, re-fetch to ensure we have latest data.
-
-    // Actually, looking at the previous code:
-    // updateStock: (id, quantity) => set((state) => ({ products: state.products.map(...) }))
-    // It was reducing stock by quantity.
-
-    // Since we have a trigger `reduce_stock_on_sale` in the DB, we might skip this call in `addSale`.
-    // But for manual stock adjustments (not sales), we might need a different method.
-    // For now, let's just re-fetch products to get updated stock.
+    // Rely on database trigger. Just refresh data.
     await get().fetchProducts()
   },
 
@@ -304,17 +290,27 @@ export const useStore = create<AppState>((set, get) => ({
       throw error
     }
 
-    // Stock is updated by DB trigger
-    // Audit log is updated by DB trigger (conceptually, or we add one manually if we prefer application logs)
-    // The DB trigger `trigger_reduce_stock_on_sale` handles stock.
-    // There isn't a trigger for sales audit log in my SQL script, only for product changes.
-    // So we might still want to add an audit log here if we want it in the `audit_logs` table 
-    // (though sales table itself is a log of sales).
-
-    // Let's rely on Sales table for sales history.
+    // Manual stock update removed - relying on 'reduce_stock_on_sale' trigger
+    // which is now working due to RLS fix.
 
     await get().fetchSales()
     await get().fetchProducts() // To get updated stock
+  },
+
+  deleteProduct: async (id: string) => {
+    // Perform soft delete by updating status to 'archived'
+    const { error } = await supabase
+      .from("products")
+      .update({ status: "archived" })
+      .eq("id", id)
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    // Refresh the products list
+    await get().fetchProducts()
   },
 
   // Audit Log Actions

@@ -30,6 +30,7 @@ export interface Product {
   batchNumber: string
   location: string
   requiresPrescription: boolean
+  status: "active" | "archived"
   createdAt: string
   updatedAt: string
 }

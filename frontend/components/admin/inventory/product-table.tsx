@@ -7,18 +7,30 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Product } from "@/lib/types"
-import { Search, Edit, AlertTriangle, Calendar, Plus } from "lucide-react"
+import { Search, Edit, AlertTriangle, Calendar, Plus, Trash2 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface ProductTableProps {
   products: Product[]
   onEditProduct: (product: Product) => void
+  onDeleteProduct: (product: Product) => void
   onAddProduct: () => void
 }
 
-export function ProductTable({ products, onEditProduct, onAddProduct }: ProductTableProps) {
+export function ProductTable({ products, onEditProduct, onDeleteProduct, onAddProduct }: ProductTableProps) {
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [stockFilter, setStockFilter] = useState("all")
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
 
   const categories = Array.from(new Set(products.map((p) => p.category)))
 
@@ -152,21 +164,34 @@ export function ProductTable({ products, onEditProduct, onAddProduct }: ProductT
                         {new Date(product.expiryDate).toLocaleDateString()}
                       </span>
                       {isExpiringSoon(product.expiryDate) && (
-                        <Calendar className="size-4 text-destructive" title="Expiring within 90 days" />
+                        <div title="Expiring within 90 days">
+                          <Calendar className="size-4 text-destructive" />
+                        </div>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">Batch: {product.batchNumber}</p>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditProduct(product)}
-                      className="text-foreground hover:bg-primary hover:text-primary-foreground"
-                    >
-                      <Edit className="mr-1 size-4" />
-                      Edit
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditProduct(product)}
+                        className="text-foreground hover:bg-primary hover:text-primary-foreground"
+                      >
+                        <Edit className="size-4" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setProductToDelete(product)}
+                        className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <Trash2 className="size-4" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -181,6 +206,31 @@ export function ProductTable({ products, onEditProduct, onAddProduct }: ProductT
         </p>
         <p>{filteredProducts.filter((p) => p.stock <= p.reorderLevel).length} items need reordering</p>
       </div>
+
+      <AlertDialog open={!!productToDelete} onOpenChange={(open: boolean) => !open && setProductToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {productToDelete?.name} from the inventory. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (productToDelete) {
+                  onDeleteProduct(productToDelete)
+                  setProductToDelete(null)
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

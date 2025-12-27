@@ -103,7 +103,8 @@ export default function POSPage() {
       // For now, we loop through items. 
       // Ideally, the backend/store would handle a batch sale to ensure atomicity.
 
-      const salesPromises = cartItems.map(async (item) => {
+      // Process each cart item as a sale sequentially to avoid race conditions on stock updates
+      for (const item of cartItems) {
         const sale: any = {
           productId: item.product.id,
           productName: item.product.name,
@@ -115,10 +116,10 @@ export default function POSPage() {
           paymentMethod,
           prescriptionNumber,
         }
-        return addSale(sale)
-      })
+        await addSale(sale)
+      }
 
-      await Promise.all(salesPromises)
+
 
       toast({
         title: "Sale completed",
