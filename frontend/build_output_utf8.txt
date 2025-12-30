@@ -1,0 +1,134 @@
+﻿
+> frontend@0.1.0 build
+> next build
+
+npm : ΓÜá Warning: 
+Next.js inferred your 
+workspace root, but 
+it may not be correct.
+At line:1 char:1
++ npm run build > 
+build_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (ΓÜá Warnin   
+ g: Ne...not be co    
+rrect.:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+ We detected multiple 
+lockfiles and 
+selected the 
+directory of C:\Users\
+kevin\package-lock.jso
+n as the root 
+directory.
+ To silence this 
+warning, set 
+`turbopack.root` in 
+your Next.js config, 
+or consider removing 
+one of the lockfiles 
+if it's not needed.
+   See https://nextjs.
+org/docs/app/api-refer
+ence/config/next-confi
+g-js/turbopack#root-di
+rectory for more 
+information.
+ Detected additional 
+lockfiles: 
+   * C:\Users\kevin\On
+eDrive\Desktop\Github 
+Projects\Pharmacy 
+Management System\Phar
+macy-IMS\frontend\pack
+age-lock.json
+
+Γû▓ Next.js 16.1.0 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 9.9s
+  Running TypeScript ...
+Failed to compile.
+
+./components/admin/aud
+it/audit-table.tsx:132
+:30
+Type error: Element 
+implicitly has an 
+'any' type because 
+expression of type 
+'"sale" | 
+"stock_adjustment" | 
+"product_added" | 
+"product_updated" | 
+"login" | "logout" | 
+"customer_added" | 
+"debt_updated"' can't 
+be used to index type 
+'{ sale: ForwardRefExo
+ticComponent<Omit<Luci
+deProps, "ref"> & RefA
+ttributes<SVGSVGElemen
+t>>; ... 4 more ...; 
+logout: ForwardRefExot
+icComponent<...>; }'.
+  Property 
+'customer_added' does 
+not exist on type '{ 
+sale: ForwardRefExotic
+Component<Omit<LucideP
+rops, "ref"> & RefAttr
+ibutes<SVGSVGElement>>
+; ... 4 more ...; 
+logout: ForwardRefExot
+icComponent<...>; }'.
+
+[0m [90m 130 |[39m 
+              filtered
+Logs[33m.[39mmap((lo
+g) [33m=>[39m {
+ [90m 131 |[39m     
+            
+[36mconst[39m dt 
+[33m=[39m formatDate
+Time(log[33m.[39mtim
+estamp)
+[31m[1m>[22m[39m[
+90m 132 |[39m        
+         
+[36mconst[39m 
+[33mIcon[39m 
+[33m=[39m actionIcon
+s[log[33m.[39maction
+] [33m||[39m 
+[33mActivity[39m
+ [90m     |[39m     
+                      
+   
+[31m[1m^[22m[39m
+ [90m 133 |[39m     
+            
+[36mconst[39m 
+colorClass 
+[33m=[39m actionColo
+rs[log[33m.[39mactio
+n] [33m||[39m 
+[32m"bg-secondary 
+text-foreground 
+border-border"[39m
+ [90m 134 |[39m
+ [90m 135 |[39m     
+            
+[36mreturn[39m ([0m
+Next.js build worker 
+exited with code: 1 
+and signal: null
+

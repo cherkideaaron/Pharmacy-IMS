@@ -12,22 +12,26 @@ interface AuditTableProps {
   logs: AuditLog[]
 }
 
-const actionIcons = {
+const actionIcons: Record<AuditLog["action"], any> = {
   sale: ShoppingCart,
   stock_adjustment: Package,
   product_added: Plus,
   product_updated: Edit,
   login: LogIn,
   logout: LogOut,
+  customer_added: Plus,
+  debt_updated: Activity,
 }
 
-const actionColors = {
+const actionColors: Record<AuditLog["action"], string> = {
   sale: "bg-green-500/10 text-green-500 border-green-500/20",
   stock_adjustment: "bg-blue-500/10 text-blue-500 border-blue-500/20",
   product_added: "bg-purple-500/10 text-purple-500 border-purple-500/20",
   product_updated: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
   login: "bg-gray-500/10 text-gray-400 border-gray-500/20",
   logout: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+  customer_added: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
+  debt_updated: "bg-rose-500/10 text-rose-500 border-rose-500/20",
 }
 
 export function AuditTable({ logs }: AuditTableProps) {
@@ -116,13 +120,13 @@ export function AuditTable({ logs }: AuditTableProps) {
               <TableHead className="text-foreground">Timestamp</TableHead>
               <TableHead className="text-foreground">Action</TableHead>
               <TableHead className="text-foreground">User</TableHead>
-          <TableHead className="text-foreground">Details</TableHead>
+              <TableHead className="text-foreground">Details</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredLogs.length === 0 ? (
               <TableRow>
-            <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                   No audit logs found
                 </TableCell>
               </TableRow>
@@ -147,7 +151,7 @@ export function AuditTable({ logs }: AuditTableProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-semibold text-foreground">{log.userName}</TableCell>
-                  <TableCell className="text-sm text-foreground">{log.details}</TableCell>
+                    <TableCell className="text-sm text-foreground">{log.details}</TableCell>
                   </TableRow>
                 )
               })
