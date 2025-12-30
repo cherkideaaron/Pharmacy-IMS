@@ -17,13 +17,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 interface CheckoutDialogProps {
   open: boolean
   onClose: () => void
-  onConfirm: (paymentMethod: "cash" | "mobile banking", prescriptionNumber?: string, notes?: string) => void
+  onConfirm: (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string) => void
   total: number
   requiresPrescription: boolean
 }
 
 export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescription }: CheckoutDialogProps) {
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "mobile banking">("cash")
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "mobile banking">("cash")
   const [prescriptionNumber, setPrescriptionNumber] = useState("")
   const [notes, setNotes] = useState("")
 
@@ -47,12 +47,18 @@ export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescr
             <Label className="text-foreground">Payment Method</Label>
             <RadioGroup
               value={paymentMethod}
-              onValueChange={(value) => setPaymentMethod(value as "cash" | "mobile banking")}
+              onValueChange={(value) => setPaymentMethod(value as "cash" | "card" | "mobile banking")}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="cash" id="cash" />
                 <Label htmlFor="cash" className="font-normal text-foreground">
                   Cash
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="card" id="card" />
+                <Label htmlFor="card" className="font-normal text-foreground">
+                  Card
                 </Label>
               </div>
               <div className="flex items-center space-x-2">

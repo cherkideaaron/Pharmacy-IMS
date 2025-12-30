@@ -11,12 +11,13 @@ interface StatCardProps {
   trend?: "up" | "down" | "neutral"
   trendValue?: string
   onClick?: () => void
+  className?: string
 }
 
-export function StatCard({ title, value, subtitle, icon: Icon, trend, trendValue, onClick }: StatCardProps) {
+export function StatCard({ title, value, subtitle, icon: Icon, trend, trendValue, onClick, className }: StatCardProps) {
   return (
     <Card
-      className={`border-border bg-card p-6 ${onClick ? "cursor-pointer transition-colors hover:bg-accent" : ""}`}
+      className={`border-border bg-card p-6 ${className || ""} ${onClick ? "cursor-pointer transition-colors hover:bg-accent" : ""}`}
       onClick={onClick}
     >
       <div className="flex items-start justify-between">

@@ -17,6 +17,8 @@ interface AppState {
   fetchProducts: () => Promise<void>
   fetchSales: () => Promise<void>
   fetchAuditLogs: () => Promise<void>
+  fetchCustomers: () => Promise<void>
+  fetchDeposits: () => Promise<void>
 
   // Products
   products: Product[]
@@ -33,6 +35,15 @@ interface AppState {
   // Audit logs
   auditLogs: AuditLog[]
   addAuditLog: (log: Omit<AuditLog, "id" | "timestamp">) => Promise<void>
+
+  // Customers
+  customers: import("./types").Customer[]
+  addCustomer: (customer: Omit<import("./types").Customer, "id" | "createdAt" | "updatedAt">) => Promise<void>
+  updateCustomerDebt: (id: string, newDebt: number, paymentAmount: number) => Promise<void>
+
+  // Deposits
+  deposits: import("./types").DailyDeposit[]
+  addDeposit: (deposit: Omit<import("./types").DailyDeposit, "id" | "createdAt">) => Promise<void>
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -43,6 +54,8 @@ export const useStore = create<AppState>((set, get) => ({
   products: [],
   sales: [],
   auditLogs: [],
+  customers: [],
+  deposits: [],
 
   // Auth
   setCurrentUser: (user) => set({ currentUser: user }),
@@ -202,6 +215,46 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 
+  fetchCustomers: async () => {
+    const { data, error } = await supabase
+      .from("customers")
+      .select("*")
+      .order("name")
+
+    if (!error && data) {
+      const mappedCustomers: import("./types").Customer[] = data.map(c => ({
+        id: c.id,
+        name: c.name,
+        phone: c.phone || "",
+        debtAmount: c.debt_amount,
+        createdAt: c.created_at,
+        updatedAt: c.updated_at
+      }))
+      set({ customers: mappedCustomers })
+    }
+  },
+
+  fetchDeposits: async () => {
+    const { data, error } = await supabase
+      .from("daily_deposits")
+      .select("*")
+      .order("date", { ascending: false })
+
+    if (!error && data) {
+      const mappedDeposits: import("./types").DailyDeposit[] = data.map(d => ({
+        id: d.id,
+        date: d.date,
+        employeeId: d.employee_id,
+        employeeName: d.employee_name,
+        cashRevenue: d.cash_revenue,
+        amountSubmitted: d.amount_submitted,
+        notes: d.notes,
+        createdAt: d.created_at
+      }))
+      set({ deposits: mappedDeposits })
+    }
+  },
+
   // Products Actions
   addProduct: async (product) => {
     const dbProduct = {
@@ -327,5 +380,83 @@ export const useStore = create<AppState>((set, get) => ({
 
     await supabase.from("audit_logs").insert(dbLog)
     await get().fetchAuditLogs()
+  },
+
+  // Customer Actions
+  addCustomer: async (customer) => {
+    const user = get().currentUser
+    const { data, error } = await supabase.from("customers").insert({
+      name: customer.name,
+      phone: customer.phone,
+      debt_amount: customer.debtAmount
+    }).select().single()
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    if (user) {
+      await get().addAuditLog({
+        userId: user.id,
+        userName: user.name,
+        action: "customer_added",
+        details: `Added new customer: ${customer.name}`
+      })
+    }
+
+    await get().fetchCustomers()
+  },
+
+  updateCustomerDebt: async (id, newDebt, paymentAmount) => {
+    const user = get().currentUser
+    const customer = get().customers.find(c => c.id === id)
+    if (!customer) return
+
+    const { error } = await supabase
+      .from("customers")
+      .update({ debt_amount: newDebt })
+      .eq("id", id)
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    if (user) {
+      const detail = paymentAmount > 0
+        ? `Customer ${customer.name} paid $${paymentAmount.toFixed(2)}. New debt: $${newDebt.toFixed(2)}`
+        : `Updated debt for ${customer.name} to $${newDebt.toFixed(2)}`
+
+      await get().addAuditLog({
+        userId: user.id,
+        userName: user.name,
+        action: "debt_updated",
+        details: detail,
+        metadata: { customerId: id, oldDebt: customer.debtAmount, newDebt, paymentAmount }
+      })
+    }
+
+    await get().fetchCustomers()
+  },
+
+  addDeposit: async (deposit) => {
+    const dbDeposit = {
+      date: deposit.date,
+      employee_id: deposit.employeeId,
+      employee_name: deposit.employeeName,
+      cash_revenue: deposit.cashRevenue,
+      amount_submitted: deposit.amountSubmitted,
+      notes: deposit.notes
+    }
+
+    const { error } = await supabase.from("daily_deposits").insert(dbDeposit)
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    await get().fetchDeposits()
   }
 }))

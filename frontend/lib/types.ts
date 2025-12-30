@@ -45,7 +45,7 @@ export interface Sale {
   employeeId: string
   employeeName: string
   timestamp: string
-  paymentMethod: "cash" | "mobile banking"
+  paymentMethod: "cash" | "card" | "mobile banking"
   prescriptionNumber?: string
   notes?: string
 }
@@ -54,10 +54,19 @@ export interface AuditLog {
   id: string
   userId: string
   userName: string
-  action: "sale" | "stock_adjustment" | "product_added" | "product_updated" | "login" | "logout"
+  action: "sale" | "stock_adjustment" | "product_added" | "product_updated" | "login" | "logout" | "customer_added" | "debt_updated"
   details: string
   timestamp: string
   metadata?: Record<string, unknown>
+}
+
+export interface Customer {
+  id: string
+  name: string
+  phone: string
+  debtAmount: number
+  createdAt: string
+  updatedAt: string
 }
 
 export interface DashboardStats {
@@ -66,4 +75,15 @@ export interface DashboardStats {
   lowStockItems: number
   expiringItems: number
   salesCount: number
+}
+
+export interface DailyDeposit {
+  id: string
+  date: string
+  employeeId: string
+  employeeName: string
+  cashRevenue: number
+  amountSubmitted: number
+  notes?: string
+  createdAt: string
 }

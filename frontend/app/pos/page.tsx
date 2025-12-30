@@ -8,9 +8,14 @@ import { ProductSearch } from "@/components/pos/product-search"
 import { Cart } from "@/components/pos/cart"
 import { CheckoutDialog } from "@/components/pos/checkout-dialog"
 import { useStore } from "@/lib/store"
-import { Store, LogOut, User, Clock, History } from "lucide-react"
+import { Store, LogOut, User, Users, Clock, History, Landmark } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CustomerManagement } from "@/components/pos/customer-management"
+import { DailySettlement } from "@/components/pos/daily-settlement"
+import { AdminSettlementHistory } from "@/components/admin/settlement-history"
 import type { Product, Sale } from "@/lib/types"
 
 interface CartItem {
@@ -26,6 +31,7 @@ export default function POSPage() {
   const currentUser = useStore((state) => state.currentUser)
   const products = useStore((state) => state.products)
   const sales = useStore((state) => state.sales)
+  const deposits = useStore((state) => state.deposits) // Added deposits selector
   const addSale = useStore((state) => state.addSale)
   const logout = useStore((state) => state.logout)
   const fetchProducts = useStore((state) => state.fetchProducts)
@@ -33,11 +39,14 @@ export default function POSPage() {
 
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("sales")
 
   // Fetch products and sales on mount
   useEffect(() => {
     fetchProducts()
     fetchSales()
+    useStore.getState().fetchCustomers()
+    useStore.getState().fetchDeposits()
   }, [fetchProducts, fetchSales])
 
   useEffect(() => {
@@ -89,7 +98,7 @@ export default function POSPage() {
     setCheckoutOpen(true)
   }
 
-  const handleConfirmCheckout = async (paymentMethod: "cash" | "mobile banking", prescriptionNumber?: string, notes?: string) => {
+  const handleConfirmCheckout = async (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string) => {
     const requiresPrescription = cartItems.some((item) => item.product.requiresPrescription)
 
     if (requiresPrescription && !prescriptionNumber) {
@@ -195,12 +204,103 @@ export default function POSPage() {
 
       {/* Main Content */}
       <div className="flex flex-1 gap-4 overflow-hidden p-6">
-        {/* Product Search */}
-        <div className="flex-1 overflow-y-auto">
-          <Card className="h-full border border-black/10 bg-white p-4 shadow-sm">
-            <ProductSearch products={products} onAddToCart={handleAddToCart} />
-          </Card>
+        {/* Left Column: Sales or Customers */}
+        <div className="flex flex-1 flex-col gap-4 overflow-hidden">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+            <TabsList className="grid w-[600px] grid-cols-3 mb-2">
+              <TabsTrigger value="sales" className="flex items-center gap-2">
+                <Store className="size-4" />
+                Sales Terminal
+              </TabsTrigger>
+              <TabsTrigger value="customers" className="flex items-center gap-2">
+                <Users className="size-4" />
+                Customer Debts
+              </TabsTrigger>
+              <TabsTrigger value="settlement" className="flex items-center gap-2">
+                <Landmark className="size-4" />
+                Daily Settlement
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="sales" className="flex-1 overflow-hidden flex flex-col gap-4 focus-visible:outline-none">
+              <div className="flex-1 overflow-y-auto">
+                <Card className="min-h-[400px] border border-black/10 bg-white p-4 shadow-sm">
+                  <ProductSearch products={products} onAddToCart={handleAddToCart} />
+                </Card>
+              </div>
+
+              {/* Daily History */}
+              <div className="h-[300px]">
+                <Card className="flex h-full flex-col overflow-hidden border border-black/10 bg-white shadow-sm">
+                  <div className="border-b border-black/10 p-4">
+                    <div className="flex items-center gap-2">
+                      <History className="size-5 text-foreground" />
+                      <h2 className="text-lg font-semibold text-foreground">Daily History</h2>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {dailySales.length === 0 ? (
+                      <div className="flex h-32 items-center justify-center text-center text-muted-foreground">
+                        <p className="text-sm">No sales today</p>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-black/5 hover:bg-transparent">
+                            <TableHead className="text-foreground">Time</TableHead>
+                            <TableHead className="text-foreground">Product</TableHead>
+                            <TableHead className="text-foreground text-center">Qty</TableHead>
+                            <TableHead className="text-foreground text-right">Amount</TableHead>
+                            <TableHead className="text-foreground">Payment</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {dailySales.map((sale) => (
+                            <TableRow key={sale.id} className="border-black/5 hover:bg-secondary/50">
+                              <TableCell className="py-3">
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Clock className="size-3" />
+                                  <span className="text-xs">{formatTime(sale.timestamp)}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-3">
+                                <p className="text-sm font-semibold text-foreground">{sale.productName}</p>
+                              </TableCell>
+                              <TableCell className="py-3 text-center">
+                                <Badge variant="secondary" className="text-xs">
+                                  {sale.quantity}x
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="py-3 text-right">
+                                <p className="font-mono text-sm font-semibold text-foreground">
+                                  ${sale.totalAmount.toFixed(2)}
+                                </p>
+                              </TableCell>
+                              <TableCell className="py-3">
+                                <Badge variant="outline" className="capitalize text-[10px] border-black/10">
+                                  {sale.paymentMethod}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="customers" className="flex-1 overflow-hidden focus-visible:outline-none">
+              <CustomerManagement />
+            </TabsContent>
+
+            <TabsContent value="settlement" className="flex-1 overflow-hidden focus-visible:outline-none">
+              <DailySettlement />
+            </TabsContent>
+          </Tabs>
         </div>
+
 
         {/* Cart and History */}
         <div className="flex w-[420px] flex-col gap-4">

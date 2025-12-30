@@ -12,10 +12,13 @@ import { SalesTable } from "@/components/admin/sales/sales-table"
 import { AuditTable } from "@/components/admin/audit/audit-table"
 import { AddProductDialog } from "@/components/admin/inventory/add-product-dialog"
 import { ExpiringItemsDialog } from "@/components/admin/expiring-items-dialog"
+import { AdminSettlementHistory } from "@/components/admin/settlement-history"
 import { useStore } from "@/lib/store"
 import { useToast } from "@/hooks/use-toast"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/lib/types"
-import { DollarSign, TrendingUp, ShoppingCart, Calendar } from "lucide-react"
+import { DollarSign, TrendingUp, ShoppingCart, Calendar, Landmark, AlertCircle, Banknote, ArrowRight, CheckCircle2, Plus, History } from "lucide-react"
 
 export default function AdminPage() {
   const router = useRouter()
@@ -34,6 +37,8 @@ export default function AdminPage() {
   const fetchAuditLogs = useStore((state) => state.fetchAuditLogs)
 
   const deleteProduct = useStore((state) => state.deleteProduct)
+  const fetchDeposits = useStore((state) => state.fetchDeposits)
+  const deposits = useStore((state) => state.deposits)
 
   const [activeTab, setActiveTab] = useState("overview")
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -46,7 +51,8 @@ export default function AdminPage() {
     fetchProducts()
     fetchSales()
     fetchAuditLogs()
-  }, [fetchProducts, fetchSales, fetchAuditLogs])
+    fetchDeposits()
+  }, [fetchProducts, fetchSales, fetchAuditLogs, fetchDeposits])
 
   useEffect(() => {
     if (!currentUser || currentUser.role !== "admin") {
@@ -86,6 +92,51 @@ export default function AdminPage() {
       expiringCount,
     }
   }, [sales, products])
+
+  const depositStats = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const todayDeposits = deposits.filter(d => d.date === todayStr)
+
+    // Total cash revenue recorded in sales today
+    const totalCashSales = sales
+      .filter(s => s.timestamp.startsWith(todayStr) && s.paymentMethod === "cash")
+      .reduce((sum, s) => sum + s.totalAmount, 0)
+
+    const totalDebtPayments = auditLogs
+      .filter(log =>
+        log.timestamp.startsWith(todayStr) &&
+        log.action === "debt_updated" &&
+        ((log.metadata as any)?.paymentAmount || 0) > 0
+      )
+      .reduce((sum, log) => sum + ((log.metadata as any)?.paymentAmount || 0), 0)
+
+    const totalExpectedToday = totalCashSales + totalDebtPayments
+    const totalSubmitted = todayDeposits.reduce((sum, d) => sum + d.amountSubmitted, 0)
+    const discrepancy = totalSubmitted - totalExpectedToday
+
+    return {
+      totalCashRevenue: totalExpectedToday,
+      totalSubmitted,
+      discrepancy,
+      hasDeposits: todayDeposits.length > 0,
+
+      // Lifetime System Balance
+      systemExpectedSales: sales
+        .filter((s) => s.paymentMethod === "cash")
+        .reduce((sum, s) => sum + s.totalAmount, 0),
+      systemExpectedDebt: auditLogs
+        .filter(log =>
+          log.action === "debt_updated" &&
+          ((log.metadata as any)?.paymentAmount || 0) > 0
+        )
+        .reduce((sum, log) => sum + ((log.metadata as any)?.paymentAmount || 0), 0),
+      systemSubmitted: deposits.reduce((sum, d) => sum + d.amountSubmitted, 0),
+    }
+  }, [deposits, sales, auditLogs])
+
+  const systemExpectedTotal = (depositStats.systemExpectedSales || 0) + (depositStats.systemExpectedDebt || 0)
+  const systemBalance = depositStats.systemSubmitted - systemExpectedTotal
+
 
   if (!currentUser || currentUser.role !== "admin") {
     // Show loading state or null while redirecting
@@ -190,6 +241,15 @@ export default function AdminPage() {
                 trendValue="15.3%"
               />
               <StatCard
+                title="System Balance"
+                value={`${systemBalance >= 0 ? '+' : ''}$${systemBalance.toFixed(2)}`}
+                subtitle="Overall cash vs deposits"
+                icon={Landmark}
+                trend={systemBalance < 0 ? "down" : "up"}
+                trendValue={systemBalance < 0 ? "Shortage" : "Excess"}
+                className={systemBalance < 0 ? "border-red-200 bg-red-50/10" : "border-green-200 bg-green-50/10"}
+              />
+              <StatCard
                 title="Soon Expiring"
                 value={stats.expiringCount}
                 subtitle="Items expiring in 2 months"
@@ -202,7 +262,47 @@ export default function AdminPage() {
 
             <div className="grid gap-6 lg:grid-cols-2">
               <RecentSales sales={sales} />
-              <LowStockAlert products={products} onViewInventory={() => setActiveTab("inventory")} />
+              <div className="space-y-6">
+                <LowStockAlert products={products} onViewInventory={() => setActiveTab("inventory")} />
+
+                <Card className="p-6 border-black/10 bg-white shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-primary/10 p-2 text-primary">
+                        <Landmark className="size-5" />
+                      </div>
+                      <h3 className="text-lg font-bold">Today's Settlements</h3>
+                    </div>
+                    {depositStats.discrepancy < 0 && (
+                      <Badge variant="destructive" className="animate-pulse">
+                        <AlertCircle className="mr-1 size-3" />
+                        Discrepancy Found
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground uppercase">Expected Cash</p>
+                      <p className="text-xl font-black font-mono tracking-tight">${depositStats.totalCashRevenue.toFixed(2)}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground uppercase">Bank Submitted</p>
+                      <p className="text-xl font-black font-mono tracking-tight text-primary">${depositStats.totalSubmitted.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <div className={`mt-6 rounded-lg p-4 border ${depositStats.discrepancy < 0 ? 'bg-red-50 border-red-200' : 'bg-zinc-50 border-zinc-100'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Net Difference:</span>
+                      <span className={`text-lg font-black font-mono ${depositStats.discrepancy < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {depositStats.discrepancy >= 0 ? '+' : ''}${depositStats.discrepancy.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+
+                <AdminSettlementHistory sales={sales} deposits={deposits} auditLogs={auditLogs} />
+              </div>
             </div>
           </div>
         )}
