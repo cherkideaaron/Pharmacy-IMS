@@ -143,8 +143,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
           <SelectContent>
             <SelectItem value="all">All Payments</SelectItem>
             <SelectItem value="cash">Cash</SelectItem>
-            <SelectItem value="card">Card</SelectItem>
-            <SelectItem value="insurance">Insurance</SelectItem>
+            <SelectItem value="mobile banking">Mobile Banking</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -195,6 +194,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
               <TableHead className="text-foreground">Payment</TableHead>
               <TableHead className="text-foreground">Employee</TableHead>
               <TableHead className="text-foreground">Prescription</TableHead>
+              <TableHead className="text-foreground">Notes</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -235,6 +235,9 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
                     <TableCell className="text-sm text-foreground">{sale.employeeName}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       {sale.prescriptionNumber || "—"}
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate text-xs text-muted-foreground italic" title={sale.notes}>
+                      {sale.notes || "—"}
                     </TableCell>
                   </TableRow>
                 )

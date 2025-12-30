@@ -164,9 +164,9 @@ export function ProductTable({ products, onEditProduct, onDeleteProduct, onAddPr
                         {new Date(product.expiryDate).toLocaleDateString()}
                       </span>
                       {isExpiringSoon(product.expiryDate) && (
-                        <div title="Expiring within 90 days">
-                          <Calendar className="size-4 text-destructive" />
-                        </div>
+                        <Badge variant="outline" className="text-[10px] border-destructive text-destructive px-1 h-4">
+                          Expiring Soon
+                        </Badge>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">Batch: {product.batchNumber}</p>

@@ -45,8 +45,9 @@ export interface Sale {
   employeeId: string
   employeeName: string
   timestamp: string
-  paymentMethod: "cash" | "card" | "insurance"
+  paymentMethod: "cash" | "mobile banking"
   prescriptionNumber?: string
+  notes?: string
 }
 
 export interface AuditLog {

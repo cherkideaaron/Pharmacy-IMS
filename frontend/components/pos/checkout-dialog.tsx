@@ -17,17 +17,19 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 interface CheckoutDialogProps {
   open: boolean
   onClose: () => void
-  onConfirm: (paymentMethod: "cash" | "card" | "insurance", prescriptionNumber?: string) => void
+  onConfirm: (paymentMethod: "cash" | "mobile banking", prescriptionNumber?: string, notes?: string) => void
   total: number
   requiresPrescription: boolean
 }
 
 export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescription }: CheckoutDialogProps) {
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "insurance">("cash")
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "mobile banking">("cash")
   const [prescriptionNumber, setPrescriptionNumber] = useState("")
+  const [notes, setNotes] = useState("")
 
   const handleConfirm = () => {
-    onConfirm(paymentMethod, prescriptionNumber || undefined)
+    onConfirm(paymentMethod, prescriptionNumber || undefined, notes || undefined)
+    setNotes("") // Clear for next sale
   }
 
   return (
@@ -45,7 +47,7 @@ export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescr
             <Label className="text-foreground">Payment Method</Label>
             <RadioGroup
               value={paymentMethod}
-              onValueChange={(value) => setPaymentMethod(value as "cash" | "card" | "insurance")}
+              onValueChange={(value) => setPaymentMethod(value as "cash" | "mobile banking")}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="cash" id="cash" />
@@ -54,18 +56,25 @@ export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescr
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="card" id="card" />
-                <Label htmlFor="card" className="font-normal text-foreground">
-                  Card
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="insurance" id="insurance" />
-                <Label htmlFor="insurance" className="font-normal text-foreground">
-                  Insurance
+                <RadioGroupItem value="mobile banking" id="mobile-banking" />
+                <Label htmlFor="mobile-banking" className="font-normal text-foreground">
+                  Mobile Banking
                 </Label>
               </div>
             </RadioGroup>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="text-foreground">
+              Sale Notes (Optional)
+            </Label>
+            <Input
+              id="notes"
+              placeholder="Enter message or notes..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="bg-secondary border-border text-foreground"
+            />
           </div>
 
           {requiresPrescription && (

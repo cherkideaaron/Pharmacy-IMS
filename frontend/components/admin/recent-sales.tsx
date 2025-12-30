@@ -48,6 +48,11 @@ export function RecentSales({ sales }: RecentSalesProps) {
                     <span>·</span>
                     <span className="capitalize">{sale.paymentMethod}</span>
                   </div>
+                  {sale.notes && (
+                    <p className="mt-2 rounded bg-background/50 p-2 text-[10px] italic text-muted-foreground border-l-2 border-primary/20">
+                      "{sale.notes}"
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="font-mono font-semibold text-foreground">${sale.totalAmount.toFixed(2)}</p>

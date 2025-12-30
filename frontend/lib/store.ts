@@ -174,7 +174,8 @@ export const useStore = create<AppState>((set, get) => ({
         employeeName: s.employee_name,
         timestamp: s.timestamp,
         paymentMethod: s.payment_method,
-        prescriptionNumber: s.prescription_number
+        prescriptionNumber: s.prescription_number,
+        notes: s.notes
       }))
       set({ sales: mappedSales })
     }
@@ -280,7 +281,8 @@ export const useStore = create<AppState>((set, get) => ({
       employee_id: sale.employeeId,
       employee_name: sale.employeeName,
       payment_method: sale.paymentMethod,
-      prescription_number: sale.prescriptionNumber
+      prescription_number: sale.prescriptionNumber,
+      notes: sale.notes
     }
 
     const { error } = await supabase.from("sales").insert(dbSale)

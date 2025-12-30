@@ -8,8 +8,9 @@ import { ProductSearch } from "@/components/pos/product-search"
 import { Cart } from "@/components/pos/cart"
 import { CheckoutDialog } from "@/components/pos/checkout-dialog"
 import { useStore } from "@/lib/store"
-import { Store, LogOut, User } from "lucide-react"
+import { Store, LogOut, User, Clock, History } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Badge } from "@/components/ui/badge"
 import type { Product, Sale } from "@/lib/types"
 
 interface CartItem {
@@ -24,17 +25,20 @@ export default function POSPage() {
   // Store selectors
   const currentUser = useStore((state) => state.currentUser)
   const products = useStore((state) => state.products)
+  const sales = useStore((state) => state.sales)
   const addSale = useStore((state) => state.addSale)
   const logout = useStore((state) => state.logout)
   const fetchProducts = useStore((state) => state.fetchProducts)
+  const fetchSales = useStore((state) => state.fetchSales)
 
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [checkoutOpen, setCheckoutOpen] = useState(false)
 
-  // Fetch products on mount
+  // Fetch products and sales on mount
   useEffect(() => {
     fetchProducts()
-  }, [fetchProducts])
+    fetchSales()
+  }, [fetchProducts, fetchSales])
 
   useEffect(() => {
     if (!currentUser) {
@@ -85,7 +89,7 @@ export default function POSPage() {
     setCheckoutOpen(true)
   }
 
-  const handleConfirmCheckout = async (paymentMethod: "cash" | "card" | "insurance", prescriptionNumber?: string) => {
+  const handleConfirmCheckout = async (paymentMethod: "cash" | "mobile banking", prescriptionNumber?: string, notes?: string) => {
     const requiresPrescription = cartItems.some((item) => item.product.requiresPrescription)
 
     if (requiresPrescription && !prescriptionNumber) {
@@ -115,6 +119,7 @@ export default function POSPage() {
           employeeName: currentUser.name,
           paymentMethod,
           prescriptionNumber,
+          notes,
         }
         await addSale(sale)
       }
@@ -145,6 +150,18 @@ export default function POSPage() {
   const subtotal = cartItems.reduce((sum, item) => sum + item.product.unitPrice * item.quantity, 0)
   const total = subtotal * 1.1 // Including 10% tax
   const requiresPrescription = cartItems.some((item) => item.product.requiresPrescription)
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const dailySales = sales
+    .filter((s) => s.employeeId === currentUser.id && new Date(s.timestamp) >= today)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp)
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+  }
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -185,14 +202,47 @@ export default function POSPage() {
           </Card>
         </div>
 
-        {/* Cart */}
-        <div className="w-[420px]">
+        {/* Cart and History */}
+        <div className="flex w-[420px] flex-col gap-4">
           <Cart
             items={cartItems}
             onUpdateQuantity={handleUpdateQuantity}
             onRemoveItem={handleRemoveItem}
             onCheckout={handleCheckout}
           />
+
+          <Card className="flex flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm">
+            <div className="border-b border-black/10 p-4">
+              <div className="flex items-center gap-2">
+                <History className="size-5 text-foreground" />
+                <h2 className="text-lg font-semibold text-foreground">Daily History</h2>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {dailySales.length === 0 ? (
+                <div className="flex h-32 items-center justify-center text-center text-muted-foreground">
+                  <p className="text-sm">No sales today</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {dailySales.map((sale) => (
+                    <div key={sale.id} className="flex items-center justify-between rounded-lg bg-secondary p-3">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{sale.productName}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="size-3" />
+                          <span>{formatTime(sale.timestamp)}</span>
+                          <span>·</span>
+                          <span>{sale.quantity}x</span>
+                        </div>
+                      </div>
+                      <p className="font-mono text-sm font-semibold text-foreground">${sale.totalAmount.toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
 
