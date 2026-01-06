@@ -9,14 +9,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
+
 import { Landmark, TrendingDown, TrendingUp, Minus, ChevronDown, ChevronUp, FileText, User, Clock } from "lucide-react"
 import type { Sale, DailyDeposit, AuditLog } from "@/lib/types"
 
@@ -88,22 +81,21 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                 </div>
             </div>
             <div className="overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow className="bg-zinc-50/50 border-black/5">
-                            <TableHead className="text-foreground font-bold">Date</TableHead>
-                            <TableHead className="text-foreground font-bold text-right">Expected (Sales)</TableHead>
-                            <TableHead className="text-foreground font-bold text-right">Submitted (Bank)</TableHead>
-                            <TableHead className="text-foreground font-bold text-right">Discrepancy</TableHead>
-                            <TableHead className="text-foreground font-bold text-center">Status</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
+            <div className="overflow-x-auto">
+                <div className="w-full text-sm">
+                    <div className="flex w-full items-center border-b border-black/5 bg-zinc-50/50">
+                        <div className="flex-1 px-4 py-3 text-left font-bold text-foreground">Date</div>
+                        <div className="w-[150px] px-4 py-3 text-right font-bold text-foreground">Expected (Sales)</div>
+                        <div className="w-[150px] px-4 py-3 text-right font-bold text-foreground">Submitted (Bank)</div>
+                        <div className="w-[120px] px-4 py-3 text-right font-bold text-foreground">Discrepancy</div>
+                        <div className="w-[120px] px-4 py-3 text-center font-bold text-foreground">Status</div>
+                    </div>
+                    <div className="flex flex-col">
                         {historyData.map((day) => (
                             <Accordion key={day.date} type="single" collapsible className="w-full">
-                                <AccordionItem value={day.date} className="border-black/5">
-                                    <TableRow className="hover:bg-zinc-50 border-0 flex w-full items-center">
-                                        <TableCell className="font-semibold flex-1">
+                                <AccordionItem value={day.date} className="border-b border-black/5 last:border-0">
+                                    <div className="flex w-full items-center hover:bg-zinc-50 transition-colors bg-white">
+                                        <div className="flex-1 px-4 py-2 font-semibold">
                                             <AccordionTrigger className="hover:no-underline py-0 py-4 h-full">
                                                 <div className="flex flex-col items-start gap-1">
                                                     <span>
@@ -120,20 +112,20 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                                                     )}
                                                 </div>
                                             </AccordionTrigger>
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-sm w-[150px]">
+                                        </div>
+                                        <div className="w-[150px] px-4 py-2 text-right font-mono text-sm">
                                             ${day.expected.toFixed(2)}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-sm text-primary w-[150px]">
+                                        </div>
+                                        <div className="w-[150px] px-4 py-2 text-right font-mono text-sm text-primary">
                                             <div className="flex flex-col items-end">
                                                 <span>${day.submitted.toFixed(2)}</span>
                                                 <span className="text-[9px] text-muted-foreground uppercase">{day.submissionsCount} submissions</span>
                                             </div>
-                                        </TableCell>
-                                        <TableCell className={`text-right font-mono font-bold text-sm w-[120px] ${day.discrepancy < 0 ? 'text-red-600' : day.discrepancy > 0 ? 'text-green-600' : 'text-zinc-400'}`}>
+                                        </div>
+                                        <div className={`w-[120px] px-4 py-2 text-right font-mono font-bold text-sm ${day.discrepancy < 0 ? 'text-red-600' : day.discrepancy > 0 ? 'text-green-600' : 'text-zinc-400'}`}>
                                             {day.discrepancy === 0 ? '$0.00' : (day.discrepancy > 0 ? `+$${day.discrepancy.toFixed(2)}` : `-$${Math.abs(day.discrepancy).toFixed(2)}`)}
-                                        </TableCell>
-                                        <TableCell className="text-center w-[120px]">
+                                        </div>
+                                        <div className="w-[120px] px-4 py-2 text-center">
                                             {day.discrepancy < 0 ? (
                                                 <Badge variant="destructive" className="text-[10px] py-0 px-2">
                                                     Shortage
@@ -147,8 +139,8 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                                                     Balanced
                                                 </Badge>
                                             )}
-                                        </TableCell>
-                                    </TableRow>
+                                        </div>
+                                    </div>
                                     <AccordionContent className="bg-zinc-50/50 px-6 py-4 border-t border-black/5">
                                         <div className="space-y-3">
                                             <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Individual Submissions</p>
@@ -195,14 +187,13 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                             </Accordion>
                         ))}
                         {historyData.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
-                                    No settlement data available yet
-                                </TableCell>
-                            </TableRow>
+                            <div className="py-12 text-center text-muted-foreground">
+                                No settlement data available yet
+                            </div>
                         )}
-                    </TableBody>
-                </Table>
+                    </div>
+                </div>
+            </div>
             </div>
         </Card>
     )

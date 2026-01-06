@@ -33,6 +33,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
         const matchesSearch =
           sale.productName.toLowerCase().includes(search.toLowerCase()) ||
           sale.employeeName.toLowerCase().includes(search.toLowerCase()) ||
+          sale.customerName?.toLowerCase().includes(search.toLowerCase()) ||
           sale.prescriptionNumber?.toLowerCase().includes(search.toLowerCase())
 
         const matchesPayment = paymentFilter === "all" || sale.paymentMethod === paymentFilter
@@ -79,7 +80,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
 
   const handleExport = () => {
     // Define CSV headers
-    const headers = ["Date", "Time", "Product", "Quantity", "Total Amount", "Payment Method", "Employee", "Prescription"]
+    const headers = ["Date", "Time", "Product", "Quantity", "Total Amount", "Payment Method", "Employee", "Customer", "Prescription"]
 
     // Convert data to CSV rows
     const csvData = filteredSales.map(sale => {
@@ -92,6 +93,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
         sale.totalAmount.toFixed(2),
         sale.paymentMethod,
         `"${sale.employeeName.replace(/"/g, '""')}"`,
+        sale.customerName ? `"${sale.customerName.replace(/"/g, '""')}"` : "Walk-in",
         sale.prescriptionNumber || ""
       ].join(",")
     })
@@ -119,7 +121,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by product, employee, or prescription..."
+            placeholder="Search by product, employee, customer, or prescription..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 bg-secondary border-border text-foreground"
@@ -193,6 +195,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
               <TableHead className="text-foreground">Amount</TableHead>
               <TableHead className="text-foreground">Payment</TableHead>
               <TableHead className="text-foreground">Employee</TableHead>
+              <TableHead className="text-foreground">Customer</TableHead>
               <TableHead className="text-foreground">Prescription</TableHead>
               <TableHead className="text-foreground">Notes</TableHead>
             </TableRow>
@@ -200,7 +203,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
           <TableBody>
             {filteredSales.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                   No sales found
                 </TableCell>
               </TableRow>
@@ -233,6 +236,9 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-foreground">{sale.employeeName}</TableCell>
+                    <TableCell className="text-sm text-foreground">
+                      {sale.customerName || <span className="text-muted-foreground italic">Walk-in</span>}
+                    </TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       {sale.prescriptionNumber || "—"}
                     </TableCell>

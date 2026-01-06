@@ -48,6 +48,8 @@ export interface Sale {
   paymentMethod: "cash" | "card" | "mobile banking"
   prescriptionNumber?: string
   notes?: string
+  customerId?: string
+  customerName?: string
 }
 
 export interface AuditLog {

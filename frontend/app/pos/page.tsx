@@ -32,6 +32,7 @@ export default function POSPage() {
   const products = useStore((state) => state.products)
   const sales = useStore((state) => state.sales)
   const deposits = useStore((state) => state.deposits) // Added deposits selector
+  const customers = useStore((state) => state.customers)
   const addSale = useStore((state) => state.addSale)
   const logout = useStore((state) => state.logout)
   const fetchProducts = useStore((state) => state.fetchProducts)
@@ -98,7 +99,7 @@ export default function POSPage() {
     setCheckoutOpen(true)
   }
 
-  const handleConfirmCheckout = async (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string) => {
+  const handleConfirmCheckout = async (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string, customerId?: string, customerName?: string) => {
     const requiresPrescription = cartItems.some((item) => item.product.requiresPrescription)
 
     if (requiresPrescription && !prescriptionNumber) {
@@ -129,6 +130,8 @@ export default function POSPage() {
           paymentMethod,
           prescriptionNumber,
           notes,
+          customerId,
+          customerName,
         }
         await addSale(sale)
       }
@@ -353,6 +356,7 @@ export default function POSPage() {
         onConfirm={handleConfirmCheckout}
         total={total}
         requiresPrescription={requiresPrescription}
+        customers={customers}
       />
     </div>
   )

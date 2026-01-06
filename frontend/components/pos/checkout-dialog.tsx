@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,23 +13,35 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { Customer } from "@/lib/types"
 
 interface CheckoutDialogProps {
   open: boolean
   onClose: () => void
-  onConfirm: (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string) => void
+  onConfirm: (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string, customerId?: string, customerName?: string) => void
   total: number
   requiresPrescription: boolean
+  customers: Customer[]
 }
 
-export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescription }: CheckoutDialogProps) {
+export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescription, customers }: CheckoutDialogProps) {
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "mobile banking">("cash")
   const [prescriptionNumber, setPrescriptionNumber] = useState("")
   const [notes, setNotes] = useState("")
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("")
 
   const handleConfirm = () => {
-    onConfirm(paymentMethod, prescriptionNumber || undefined, notes || undefined)
+    const selectedCustomer = customers.find(c => c.id === selectedCustomerId)
+    onConfirm(
+      paymentMethod,
+      prescriptionNumber || undefined,
+      notes || undefined,
+      selectedCustomerId || undefined,
+      selectedCustomer?.name
+    )
     setNotes("") // Clear for next sale
+    setSelectedCustomerId("") // Clear customer selection
   }
 
   return (
@@ -81,6 +93,25 @@ export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescr
               onChange={(e) => setNotes(e.target.value)}
               className="bg-secondary border-border text-foreground"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customer" className="text-foreground">
+              Customer (Optional)
+            </Label>
+            <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+              <SelectTrigger className="bg-secondary border-border text-foreground">
+                <SelectValue placeholder="Walk-in customer (no account)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Walk-in customer (no account)</SelectItem>
+                {customers.map((customer) => (
+                  <SelectItem key={customer.id} value={customer.id}>
+                    {customer.name} {customer.phone && `(${customer.phone})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {requiresPrescription && (

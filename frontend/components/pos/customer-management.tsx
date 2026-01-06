@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -44,6 +44,16 @@ export function CustomerManagement() {
     const [paymentAmount, setPaymentAmount] = useState<string>("")
     const [additionalDebt, setAdditionalDebt] = useState<string>("")
 
+    // Ref for auto-focusing the name input
+    const nameInputRef = useRef<HTMLInputElement>(null)
+
+    // Auto-focus name field when dialog opens
+    useEffect(() => {
+        if (addDialogOpen && nameInputRef.current) {
+            nameInputRef.current.focus()
+        }
+    }, [addDialogOpen])
+
     const filteredCustomers = useMemo(() => {
         return customers.filter(
             (c) =>
@@ -53,10 +63,10 @@ export function CustomerManagement() {
     }, [customers, searchTerm])
 
     const handleAddCustomer = async () => {
-        if (!newCustomer.name) return
+        if (!newCustomer.name.trim()) return
         await addCustomer({
-            name: newCustomer.name,
-            phone: newCustomer.phone,
+            name: newCustomer.name.trim(),
+            phone: newCustomer.phone.trim(),
             debtAmount: Number(newCustomer.debtAmount) || 0
         })
         setNewCustomer({ name: "", phone: "", debtAmount: 0 })
@@ -84,6 +94,9 @@ export function CustomerManagement() {
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
+                        name="customer-search"
+                        id="customer-search"
+                        autoComplete="off"
                         placeholder="Search customers by name or phone..."
                         className="pl-9 bg-white border-black/10"
                         value={searchTerm}
@@ -91,7 +104,16 @@ export function CustomerManagement() {
                     />
                 </div>
 
-                <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+                <Dialog
+                    open={addDialogOpen}
+                    onOpenChange={(open) => {
+                        setAddDialogOpen(open)
+                        if (open) {
+                            setSearchTerm("") // Clear search when opening add dialog
+                            setNewCustomer({ name: "", phone: "", debtAmount: 0 })
+                        }
+                    }}
+                >
                     <DialogTrigger asChild>
                         <Button className="bg-primary text-primary-foreground">
                             <UserPlus className="mr-2 size-4" />
@@ -109,7 +131,10 @@ export function CustomerManagement() {
                             <div className="space-y-2">
                                 <Label htmlFor="cust-name">Full Name</Label>
                                 <Input
+                                    ref={nameInputRef}
                                     id="cust-name"
+                                    name="customer-name"
+                                    autoComplete="off"
                                     placeholder="John Doe"
                                     value={newCustomer.name}
                                     onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
@@ -119,6 +144,8 @@ export function CustomerManagement() {
                                 <Label htmlFor="cust-phone">Phone Number</Label>
                                 <Input
                                     id="cust-phone"
+                                    name="customer-phone"
+                                    autoComplete="new-phone" // Non-standard value to prevent autofill linking
                                     placeholder="+251..."
                                     value={newCustomer.phone}
                                     onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
@@ -128,16 +155,21 @@ export function CustomerManagement() {
                                 <Label htmlFor="cust-debt">Initial Debt (Optional)</Label>
                                 <Input
                                     id="cust-debt"
+                                    name="customer-debt"
                                     type="number"
                                     placeholder="0.00"
                                     value={newCustomer.debtAmount}
-                                    onChange={(e) => setNewCustomer({ ...newCustomer, debtAmount: Number(e.target.value) })}
+                                    onChange={(e) => setNewCustomer({ ...newCustomer, debtAmount: Number(e.target.value) || 0 })}
                                 />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleAddCustomer} disabled={!newCustomer.name}>Create Customer</Button>
+                            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button onClick={handleAddCustomer} disabled={!newCustomer.name.trim()}>
+                                Create Customer
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
