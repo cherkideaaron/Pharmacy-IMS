@@ -78,7 +78,11 @@ export function ProductSearch({ products, onAddToCart }: ProductSearchProps) {
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => (
-                  <TableRow key={product.id} className="border-black/5 hover:bg-white group">
+                  <TableRow
+                    key={product.id}
+                    className="border-black/5 hover:bg-white group cursor-pointer active:bg-zinc-100"
+                    onClick={() => onAddToCart(product)}
+                  >
                     <TableCell className="py-4">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
@@ -124,7 +128,10 @@ export function ProductSearch({ products, onAddToCart }: ProductSearchProps) {
                     </TableCell>
                     <TableCell className="py-4 text-right">
                       <Button
-                        onClick={() => onAddToCart(product)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onAddToCart(product)
+                        }}
                         size="sm"
                         className="bg-primary text-primary-foreground shadow-sm hover:scale-105 transition-transform"
                         disabled={product.stock === 0}
