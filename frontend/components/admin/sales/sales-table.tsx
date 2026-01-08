@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react" // Added useEffect
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Sale, Product } from "@/lib/types"
 import { Search, Download, Calendar } from "lucide-react"
 import { Card } from "@/components/ui/card"
+import { startOfMonth, endOfMonth, format } from "date-fns"
+import { useStore } from "@/lib/store"
 
 interface SalesTableProps {
   sales: Sale[]
@@ -16,9 +18,70 @@ interface SalesTableProps {
 }
 
 export function SalesTable({ sales, products = [] }: SalesTableProps) {
+  const getSalesByDateRange = useStore((state) => state.getSalesByDateRange)
+  const [viewSales, setViewSales] = useState<Sale[]>(sales)
   const [search, setSearch] = useState("")
   const [paymentFilter, setPaymentFilter] = useState("all")
   const [dateFilter, setDateFilter] = useState("all")
+  const [selectedYear, setSelectedYear] = useState<string>("all")
+  const [selectedMonth, setSelectedMonth] = useState<string>("all")
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Update viewSales when props.sales changes (only if not filtering by specific month/year)
+  useEffect(() => {
+    if (selectedYear === "all" || selectedMonth === "all") {
+      setViewSales(sales)
+    }
+  }, [sales, selectedYear, selectedMonth])
+
+  // Handle Month/Year filter changes
+  useEffect(() => {
+    const fetchFilteredSales = async () => {
+      if (selectedYear !== "all" && selectedMonth !== "all") {
+        setIsLoading(true)
+        try {
+          const year = parseInt(selectedYear)
+          const month = parseInt(selectedMonth)
+          const startDate = startOfMonth(new Date(year, month)).toISOString()
+          const endDate = endOfMonth(new Date(year, month)).toISOString()
+
+          const filteredData = await getSalesByDateRange(startDate, endDate)
+          setViewSales(filteredData)
+          // Reset quick date filter when using specific month/year
+          setDateFilter("all")
+        } catch (error) {
+          console.error("Failed to fetch filtered sales", error)
+        } finally {
+          setIsLoading(false)
+        }
+      } else if (selectedYear === "all" || selectedMonth === "all") {
+        // Revert to default props sales if filters are cleared
+        setViewSales(sales)
+      }
+    }
+
+    fetchFilteredSales()
+  }, [selectedYear, selectedMonth, getSalesByDateRange, sales])
+
+  // Generate Year Options (Current Year back to 2023)
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: currentYear - 2023 + 1 }, (_, i) => (2023 + i).toString())
+
+  // Month Options
+  const months = [
+    { value: "0", label: "January" },
+    { value: "1", label: "February" },
+    { value: "2", label: "March" },
+    { value: "3", label: "April" },
+    { value: "4", label: "May" },
+    { value: "5", label: "June" },
+    { value: "6", label: "July" },
+    { value: "7", label: "August" },
+    { value: "8", label: "September" },
+    { value: "9", label: "October" },
+    { value: "10", label: "November" },
+    { value: "11", label: "December" },
+  ]
 
   const filteredSales = useMemo(() => {
     const now = new Date()
@@ -28,7 +91,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
     const monthAgo = new Date(today)
     monthAgo.setMonth(monthAgo.getMonth() - 1)
 
-    return sales
+    return viewSales
       .filter((sale) => {
         const matchesSearch =
           sale.productName.toLowerCase().includes(search.toLowerCase()) ||
@@ -48,7 +111,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
         return matchesSearch && matchesPayment && matchesDate
       })
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-  }, [sales, search, paymentFilter, dateFilter])
+  }, [viewSales, search, paymentFilter, dateFilter])
 
   const totals = useMemo(() => {
     return filteredSales.reduce(
@@ -127,12 +190,51 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
             className="pl-10 bg-secondary border-border text-foreground"
           />
         </div>
-        <Select value={dateFilter} onValueChange={setDateFilter}>
+
+
+        {/* Month/Year Filters */}
+        <div className="flex gap-2">
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[130px] bg-secondary border-border text-foreground">
+              <SelectValue placeholder="Month" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Month</SelectItem>
+              {months.map((month) => (
+                <SelectItem key={month.value} value={month.value}>{month.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[100px] bg-secondary border-border text-foreground">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Year</SelectItem>
+              {years.map((year) => (
+                <SelectItem key={year} value={year}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Select
+          value={dateFilter}
+          onValueChange={(val) => {
+            setDateFilter(val)
+            if (val !== "all") {
+              setSelectedMonth("all")
+              setSelectedYear("all")
+            }
+          }}
+          disabled={selectedYear !== "all" && selectedMonth !== "all"}
+        >
           <SelectTrigger className="w-[150px] bg-secondary border-border text-foreground">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="all">Recent</SelectItem>
             <SelectItem value="today">Today</SelectItem>
             <SelectItem value="week">Last 7 Days</SelectItem>
             <SelectItem value="month">Last 30 Days</SelectItem>
@@ -311,9 +413,11 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
       </div>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <p>Showing {filteredSales.length} transactions</p>
+        <p>
+          {isLoading ? "Loading data..." : `Showing ${filteredSales.length} transactions`}
+        </p>
         <p>Total: ${totals.revenue.toFixed(2)}</p>
       </div>
-    </div>
+    </div >
   )
 }

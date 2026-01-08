@@ -31,6 +31,7 @@ interface AppState {
   // Sales
   sales: Sale[]
   addSale: (sale: Omit<Sale, "id" | "timestamp">) => Promise<void>
+  getSalesByDateRange: (startDate: string, endDate: string) => Promise<Sale[]>
 
   // Audit logs
   auditLogs: AuditLog[]
@@ -354,6 +355,40 @@ export const useStore = create<AppState>((set, get) => ({
 
     await get().fetchSales()
     await get().fetchProducts() // To get updated stock
+  },
+
+  getSalesByDateRange: async (startDate, endDate) => {
+    const { data, error } = await supabase
+      .from("sales")
+      .select("*")
+      .gte("timestamp", startDate)
+      .lte("timestamp", endDate)
+      .order("timestamp", { ascending: false })
+
+    if (error) {
+      console.error("Error fetching sales range:", error)
+      return []
+    }
+
+    if (data) {
+      return data.map(s => ({
+        id: s.id,
+        productId: s.product_id,
+        productName: s.product_name,
+        quantity: s.quantity,
+        unitPrice: s.unit_price,
+        totalAmount: s.total_amount,
+        employeeId: s.employee_id,
+        employeeName: s.employee_name,
+        timestamp: s.timestamp,
+        paymentMethod: s.payment_method,
+        prescriptionNumber: s.prescription_number,
+        notes: s.notes,
+        customerId: s.customer_id,
+        customerName: s.customer_name
+      }))
+    }
+    return []
   },
 
   deleteProduct: async (id: string) => {
