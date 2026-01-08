@@ -31,7 +31,7 @@ export function RecentSales({ sales }: RecentSalesProps) {
             <p className="text-sm">No sales recorded yet</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
             {recentSales.map((sale) => (
               <div key={sale.id} className="flex items-start justify-between rounded-lg bg-secondary p-4">
                 <div className="flex-1 space-y-1">

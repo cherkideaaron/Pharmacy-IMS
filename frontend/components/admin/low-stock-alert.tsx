@@ -37,7 +37,7 @@ export function LowStockAlert({ products, onViewInventory }: LowStockAlertProps)
             <p className="text-sm text-muted-foreground">All items are well stocked</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid gap-4 md:grid-cols-2">
             {lowStockProducts.map((product) => (
               <div
                 key={product.id}

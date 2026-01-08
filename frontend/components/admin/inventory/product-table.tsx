@@ -201,7 +201,7 @@ export function ProductTable({ products, onEditProduct, onDeleteProduct, onAddPr
       </div>
 
       {/* Mobile Card View */}
-      <div className="space-y-4 lg:hidden">
+      <div className="grid gap-4 md:grid-cols-2 lg:hidden">
         {filteredProducts.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
             No products found

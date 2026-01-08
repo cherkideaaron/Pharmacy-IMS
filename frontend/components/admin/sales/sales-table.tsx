@@ -185,7 +185,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
       </div>
 
       {/* Desktop Table - Hidden on Mobile */}
-      <div className="hidden rounded-lg border border-border bg-card md:block">
+      <div className="hidden rounded-lg border border-border bg-card lg:block">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
@@ -254,7 +254,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
       </div>
 
       {/* Mobile Card View */}
-      <div className="space-y-4 md:hidden">
+      <div className="grid gap-4 md:grid-cols-2 lg:hidden">
         {filteredSales.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
             No sales found

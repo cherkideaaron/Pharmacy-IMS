@@ -89,7 +89,7 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                         <div className="w-[120px] px-4 py-3 text-right font-bold text-foreground">Discrepancy</div>
                         <div className="w-[120px] px-4 py-3 text-center font-bold text-foreground">Status</div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="grid gap-4 md:grid-cols-2">
                         {historyData.map((day) => (
                             <Accordion key={day.date} type="single" collapsible className="w-full">
                                 <AccordionItem value={day.date} className="border-b border-black/5 last:border-0">
