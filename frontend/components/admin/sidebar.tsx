@@ -11,7 +11,7 @@ interface SidebarProps {
   userName: string
 }
 
-export function Sidebar({ activeTab, onTabChange, onLogout, userName }: SidebarProps) {
+export function Sidebar({ activeTab, onTabChange, onLogout, userName, className, onNavigate }: SidebarProps & { className?: string, onNavigate?: () => void }) {
   const tabs = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "inventory", label: "Inventory", icon: Package },
@@ -19,8 +19,13 @@ export function Sidebar({ activeTab, onTabChange, onLogout, userName }: SidebarP
     { id: "audit", label: "Audit Logs", icon: FileText },
   ]
 
+  const handleTabChange = (id: string) => {
+    onTabChange(id)
+    onNavigate?.()
+  }
+
   return (
-    <div className="flex h-full w-64 flex-col border-r border-border bg-card">
+    <div className={cn("flex h-full w-64 flex-col border-r border-border bg-card", className)}>
       <div className="flex h-14 items-center gap-2 border-b bg-muted/40 px-6">
         <LayoutDashboard className="size-6 text-primary" />
         <div className="flex flex-col">
@@ -36,7 +41,7 @@ export function Sidebar({ activeTab, onTabChange, onLogout, userName }: SidebarP
             <Button
               key={tab.id}
               variant="ghost"
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={cn(
                 "w-full justify-start gap-3 text-foreground",
                 activeTab === tab.id &&

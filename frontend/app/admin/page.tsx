@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/admin/sidebar"
+import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/admin/stat-card"
 import { RecentSales } from "@/components/admin/recent-sales"
 import { LowStockAlert } from "@/components/admin/low-stock-alert"
@@ -18,7 +19,8 @@ import { useToast } from "@/hooks/use-toast"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/lib/types"
-import { DollarSign, TrendingUp, ShoppingCart, Calendar, Landmark, AlertCircle, Banknote, ArrowRight, CheckCircle2, Plus, History } from "lucide-react"
+import { DollarSign, TrendingUp, ShoppingCart, Calendar, Landmark, AlertCircle, Banknote, ArrowRight, CheckCircle2, Plus, History, Menu, LayoutDashboard } from "lucide-react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export default function AdminPage() {
   const router = useRouter()
@@ -204,11 +206,44 @@ export default function AdminPage() {
     }
   }
 
+  const [sheetOpen, setSheetOpen] = useState(false)
+
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} userName={currentUser.name} />
+      {/* Mobile Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
+        <div className="flex items-center gap-2">
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="mr-2">
+                <Menu className="size-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 border-r w-64">
+              <Sidebar
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                userName={currentUser.name}
+                className="w-full border-none"
+                onNavigate={() => setSheetOpen(false)}
+              />
+            </SheetContent>
+          </Sheet>
+          <div className="flex items-center gap-2">
+            <LayoutDashboard className="size-5 text-primary" />
+            <span className="font-mono font-bold">Jack-VET</span>
+          </div>
+        </div>
+      </div>
 
-      <main className="flex-1 overflow-y-auto">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex">
+        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} userName={currentUser.name} />
+      </div>
+
+      <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
         {activeTab === "overview" && (
           <div className="p-8 space-y-8">
             <div>

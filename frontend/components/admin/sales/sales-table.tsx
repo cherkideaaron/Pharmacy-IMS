@@ -184,8 +184,8 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
         </Card>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border border-border bg-card">
+      {/* Desktop Table - Hidden on Mobile */}
+      <div className="hidden rounded-lg border border-border bg-card md:block">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
@@ -251,6 +251,63 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="space-y-4 md:hidden">
+        {filteredSales.length === 0 ? (
+          <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+            No sales found
+          </div>
+        ) : (
+          filteredSales.map((sale) => {
+            const dt = formatDateTime(sale.timestamp)
+            return (
+              <Card key={sale.id} className="border-border bg-card p-4">
+                <div className="mb-4 flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="font-semibold text-foreground">{sale.productName}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="size-3" />
+                      {dt.date} at {dt.time}
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="capitalize border-border text-foreground">{sale.paymentMethod}</Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Quantity</p>
+                    <p className="font-medium text-foreground">{sale.quantity}x</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Total Amount</p>
+                    <p className="font-mono font-bold text-foreground">${sale.totalAmount.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Employee</p>
+                    <p className="text-foreground">{sale.employeeName}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Customer</p>
+                    <p className="text-foreground">{sale.customerName || "Walk-in"}</p>
+                  </div>
+                </div>
+
+                {(sale.prescriptionNumber || sale.notes) && (
+                  <div className="mt-4 border-t border-border pt-3 text-xs">
+                    {sale.prescriptionNumber && (
+                      <p className="text-muted-foreground"><span className="font-medium text-foreground">Rx:</span> {sale.prescriptionNumber}</p>
+                    )}
+                    {sale.notes && (
+                      <p className="text-muted-foreground mt-1"><span className="font-medium text-foreground">Note:</span> {sale.notes}</p>
+                    )}
+                  </div>
+                )}
+              </Card>
+            )
+          })
+        )}
       </div>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">

@@ -206,22 +206,25 @@ export default function POSPage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 gap-4 overflow-hidden p-6">
+      <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 md:flex-row md:p-6">
         {/* Left Column: Sales or Customers */}
         <div className="flex flex-1 flex-col gap-4 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-[600px] grid-cols-3 mb-2">
-              <TabsTrigger value="sales" className="flex items-center gap-2">
-                <Store className="size-4" />
-                Sales Terminal
+            <TabsList className="grid w-full grid-cols-3 mb-2 md:w-[600px]">
+              <TabsTrigger value="sales" className="flex items-center gap-2 text-xs md:text-sm">
+                <Store className="size-3 md:size-4" />
+                <span className="hidden sm:inline">Sales Terminal</span>
+                <span className="sm:hidden">Sales</span>
               </TabsTrigger>
-              <TabsTrigger value="customers" className="flex items-center gap-2">
-                <Users className="size-4" />
-                Customer Debts
+              <TabsTrigger value="customers" className="flex items-center gap-2 text-xs md:text-sm">
+                <Users className="size-3 md:size-4" />
+                <span className="hidden sm:inline">Customer Debts</span>
+                <span className="sm:hidden">Debts</span>
               </TabsTrigger>
-              <TabsTrigger value="settlement" className="flex items-center gap-2">
-                <Landmark className="size-4" />
-                Daily Settlement
+              <TabsTrigger value="settlement" className="flex items-center gap-2 text-xs md:text-sm">
+                <Landmark className="size-3 md:size-4" />
+                <span className="hidden sm:inline">Daily Settlement</span>
+                <span className="sm:hidden">Settle</span>
               </TabsTrigger>
             </TabsList>
 
@@ -232,8 +235,8 @@ export default function POSPage() {
                 </Card>
               </div>
 
-              {/* Daily History */}
-              <div className="h-[300px]">
+              {/* Daily History - Hidden on really small screens if needed, or kept */}
+              <div className="hidden h-[300px] md:block">
                 <Card className="flex h-full flex-col overflow-hidden border border-black/10 bg-white shadow-sm">
                   <div className="border-b border-black/10 p-4">
                     <div className="flex items-center gap-2">
@@ -306,7 +309,7 @@ export default function POSPage() {
 
 
         {/* Cart and History */}
-        <div className="flex w-[420px] flex-col gap-4">
+        <div className="flex w-full flex-col gap-4 md:w-[420px]">
           <Cart
             items={cartItems}
             onUpdateQuantity={handleUpdateQuantity}
@@ -314,7 +317,41 @@ export default function POSPage() {
             onCheckout={handleCheckout}
           />
 
-          <Card className="flex flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm">
+          <Card className="flex flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm md:hidden">
+            {/* Mobile Daily History List */}
+            <div className="border-b border-black/10 p-4">
+              <div className="flex items-center gap-2">
+                <History className="size-5 text-foreground" />
+                <h2 className="text-lg font-semibold text-foreground">Daily History</h2>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 max-h-[300px]">
+              {dailySales.length === 0 ? (
+                <div className="flex h-20 items-center justify-center text-center text-muted-foreground">
+                  <p className="text-sm">No sales today</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {dailySales.map((sale) => (
+                    <div key={sale.id} className="flex items-center justify-between rounded-lg bg-secondary p-3">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{sale.productName}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="size-3" />
+                          <span>{formatTime(sale.timestamp)}</span>
+                          <span>·</span>
+                          <span>{sale.quantity}x</span>
+                        </div>
+                      </div>
+                      <p className="font-mono text-sm font-semibold text-foreground">${sale.totalAmount.toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+
+          <Card className="hidden flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm md:flex">
             <div className="border-b border-black/10 p-4">
               <div className="flex items-center gap-2">
                 <History className="size-5 text-foreground" />

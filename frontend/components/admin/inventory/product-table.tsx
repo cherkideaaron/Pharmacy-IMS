@@ -100,8 +100,8 @@ export function ProductTable({ products, onEditProduct, onDeleteProduct, onAddPr
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border border-border bg-card">
+      {/* Desktop Table - Hidden on Mobile */}
+      <div className="hidden rounded-lg border border-border bg-card md:block">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
@@ -198,6 +198,74 @@ export function ProductTable({ products, onEditProduct, onDeleteProduct, onAddPr
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="space-y-4 md:hidden">
+        {filteredProducts.length === 0 ? (
+          <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+            No products found
+          </div>
+        ) : (
+          filteredProducts.map((product) => (
+            <div key={product.id} className="rounded-lg border border-border bg-card p-4">
+              <div className="mb-4 flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-foreground">{product.name}</h3>
+                    {product.requiresPrescription && (
+                      <Badge variant="outline" className="text-xs border-destructive text-destructive">
+                        Rx
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{product.genericName} · {product.strength}</p>
+                </div>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => onEditProduct(product)} className="h-8 w-8">
+                    <Edit className="size-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setProductToDelete(product)} className="h-8 w-8 text-destructive hover:text-destructive">
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-xs text-muted-foreground">Stock</span>
+                  <div className="flex items-center gap-2">
+                    {product.stock <= product.reorderLevel ? (
+                      <Badge variant="destructive" className="gap-1 px-1.5 h-5">
+                        {product.stock}
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="px-1.5 h-5 text-foreground">
+                        {product.stock}
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">(Reorder: {product.reorderLevel})</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-muted-foreground">Price</span>
+                  <p className="font-mono font-semibold">${product.unitPrice.toFixed(2)}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">SKU / Location</span>
+                  <p className="truncate">{product.sku}</p>
+                  <p className="text-xs text-muted-foreground">{product.location}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-muted-foreground">Expiry</span>
+                  <p className={isExpiringSoon(product.expiryDate) ? "text-destructive font-medium" : "text-foreground"}>
+                    {new Date(product.expiryDate).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
