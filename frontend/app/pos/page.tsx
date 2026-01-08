@@ -317,7 +317,7 @@ export default function POSPage() {
             onCheckout={handleCheckout}
           />
 
-          <Card className="hidden flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm">
+          <Card className="flex flex-col min-h-[350px] lg:hidden overflow-hidden border border-black/10 bg-white shadow-sm">
             {/* Mobile Daily History List */}
             <div className="border-b border-black/10 p-4">
               <div className="flex items-center gap-2">
@@ -351,38 +351,7 @@ export default function POSPage() {
             </div>
           </Card>
 
-          <Card className="hidden flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm md:flex">
-            <div className="border-b border-black/10 p-4">
-              <div className="flex items-center gap-2">
-                <History className="size-5 text-foreground" />
-                <h2 className="text-lg font-semibold text-foreground">Daily History</h2>
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              {dailySales.length === 0 ? (
-                <div className="flex h-32 items-center justify-center text-center text-muted-foreground">
-                  <p className="text-sm">No sales today</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {dailySales.map((sale) => (
-                    <div key={sale.id} className="flex items-center justify-between rounded-lg bg-secondary p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{sale.productName}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="size-3" />
-                          <span>{formatTime(sale.timestamp)}</span>
-                          <span>·</span>
-                          <span>{sale.quantity}x</span>
-                        </div>
-                      </div>
-                      <p className="font-mono text-sm font-semibold text-foreground">${sale.totalAmount.toFixed(2)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Card>
+
         </div>
       </div>
 
