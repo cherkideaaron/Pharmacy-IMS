@@ -317,7 +317,7 @@ export default function POSPage() {
             onCheckout={handleCheckout}
           />
 
-          <Card className="flex flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm md:hidden">
+          <Card className="hidden flex-1 flex-col overflow-hidden border border-black/10 bg-white shadow-sm">
             {/* Mobile Daily History List */}
             <div className="border-b border-black/10 p-4">
               <div className="flex items-center gap-2">
