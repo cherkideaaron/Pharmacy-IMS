@@ -206,11 +206,11 @@ export default function POSPage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto md:overflow-hidden md:flex-row md:p-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto lg:overflow-hidden lg:flex-row lg:p-6">
         {/* Left Column: Sales or Customers */}
-        <div className="flex flex-col gap-4 flex-none md:flex-1 md:overflow-hidden">
+        <div className="flex flex-col gap-4 flex-none lg:flex-1 lg:overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="flex w-full overflow-x-auto mb-2 md:grid md:grid-cols-3 md:w-[600px] shrink-0">
+            <TabsList className="flex w-full overflow-x-auto mb-2 lg:grid lg:grid-cols-3 lg:w-[600px] shrink-0">
               <TabsTrigger value="sales" className="flex items-center gap-2 text-xs md:text-sm">
                 <Store className="size-3 md:size-4" />
                 <span className="hidden sm:inline">Sales Terminal</span>
@@ -236,7 +236,7 @@ export default function POSPage() {
               </div>
 
               {/* Daily History - Hidden on really small screens if needed, or kept */}
-              <div className="hidden h-[300px] md:block">
+              <div className="hidden h-[300px] lg:block">
                 <Card className="flex h-full flex-col overflow-hidden border border-black/10 bg-white shadow-sm">
                   <div className="border-b border-black/10 p-4">
                     <div className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export default function POSPage() {
 
 
         {/* Cart and History */}
-        <div className="flex w-full flex-col gap-4 md:w-[420px]">
+        <div className="flex w-full flex-col gap-4 lg:w-[420px]">
           <Cart
             items={cartItems}
             onUpdateQuantity={handleUpdateQuantity}
