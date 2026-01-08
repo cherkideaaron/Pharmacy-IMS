@@ -211,7 +211,7 @@ export default function AdminPage() {
   return (
     <div className="flex h-screen bg-background">
       {/* Mobile Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
+      <div className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4 lg:hidden">
         <div className="flex items-center gap-2">
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
@@ -239,11 +239,11 @@ export default function AdminPage() {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex">
+      <div className="hidden lg:flex">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} userName={currentUser.name} />
       </div>
 
-      <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
+      <main className="flex-1 overflow-y-auto pt-14 lg:pt-0">
         {activeTab === "overview" && (
           <div className="p-8 space-y-8">
             <div>

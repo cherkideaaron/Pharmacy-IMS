@@ -206,11 +206,11 @@ export default function POSPage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 md:flex-row md:p-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto md:overflow-hidden md:flex-row md:p-6">
         {/* Left Column: Sales or Customers */}
-        <div className="flex flex-1 flex-col gap-4 overflow-hidden">
+        <div className="flex flex-col gap-4 flex-none md:flex-1 md:overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 mb-2 md:w-[600px]">
+            <TabsList className="flex w-full overflow-x-auto mb-2 md:grid md:grid-cols-3 md:w-[600px] shrink-0">
               <TabsTrigger value="sales" className="flex items-center gap-2 text-xs md:text-sm">
                 <Store className="size-3 md:size-4" />
                 <span className="hidden sm:inline">Sales Terminal</span>

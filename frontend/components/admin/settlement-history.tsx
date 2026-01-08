@@ -81,9 +81,8 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                 </div>
             </div>
             <div className="overflow-x-auto">
-            <div className="overflow-x-auto">
                 <div className="w-full text-sm">
-                    <div className="flex w-full items-center border-b border-black/5 bg-zinc-50/50">
+                    <div className="hidden lg:flex w-full items-center border-b border-black/5 bg-zinc-50/50">
                         <div className="flex-1 px-4 py-3 text-left font-bold text-foreground">Date</div>
                         <div className="w-[150px] px-4 py-3 text-right font-bold text-foreground">Expected (Sales)</div>
                         <div className="w-[150px] px-4 py-3 text-right font-bold text-foreground">Submitted (Bank)</div>
@@ -94,7 +93,8 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                         {historyData.map((day) => (
                             <Accordion key={day.date} type="single" collapsible className="w-full">
                                 <AccordionItem value={day.date} className="border-b border-black/5 last:border-0">
-                                    <div className="flex w-full items-center hover:bg-zinc-50 transition-colors bg-white">
+                                    {/* Desktop Row */}
+                                    <div className="hidden lg:flex w-full items-center hover:bg-zinc-50 transition-colors bg-white">
                                         <div className="flex-1 px-4 py-2 font-semibold">
                                             <AccordionTrigger className="hover:no-underline py-0 py-4 h-full">
                                                 <div className="flex flex-col items-start gap-1">
@@ -140,6 +140,56 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                                                 </Badge>
                                             )}
                                         </div>
+                                    </div>
+
+                                    {/* Mobile/Tablet Card Row */}
+                                    <div className="lg:hidden w-full hover:bg-zinc-50 transition-colors bg-white">
+                                        <AccordionTrigger className="hover:no-underline px-4 py-4 w-full">
+                                            <div className="flex flex-col w-full gap-3">
+                                                <div className="flex items-center justify-between w-full">
+                                                    <span className="font-semibold">
+                                                        {new Date(day.date).toLocaleDateString("en-US", {
+                                                            weekday: 'short',
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    <div>
+                                                        {day.discrepancy < 0 ? (
+                                                            <Badge variant="destructive" className="text-[10px] py-0 px-2">
+                                                                Shortage
+                                                            </Badge>
+                                                        ) : day.discrepancy > 0 ? (
+                                                            <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 text-[10px] py-0 px-2 border-0">
+                                                                Excess
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge variant="outline" className="text-[10px] py-0 px-2 border-black/10">
+                                                                Balanced
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4 text-sm w-full">
+                                                    <div className="flex flex-col items-start">
+                                                        <span className="text-[10px] text-muted-foreground uppercase">Expected</span>
+                                                        <span className="font-mono">${day.expected.toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-[10px] text-muted-foreground uppercase">Submitted</span>
+                                                        <span className="font-mono text-primary">${day.submitted.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center justify-between w-full pt-2 border-t border-dashed border-black/10 text-xs">
+                                                    <span className="text-muted-foreground">Discrepancy</span>
+                                                    <span className={`font-mono font-bold ${day.discrepancy < 0 ? 'text-red-600' : day.discrepancy > 0 ? 'text-green-600' : 'text-zinc-400'}`}>
+                                                        {day.discrepancy === 0 ? '$0.00' : (day.discrepancy > 0 ? `+$${day.discrepancy.toFixed(2)}` : `-$${Math.abs(day.discrepancy).toFixed(2)}`)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </AccordionTrigger>
                                     </div>
                                     <AccordionContent className="bg-zinc-50/50 px-6 py-4 border-t border-black/5">
                                         <div className="space-y-3">
@@ -194,7 +244,7 @@ export function AdminSettlementHistory({ sales, deposits, auditLogs }: AdminSett
                     </div>
                 </div>
             </div>
-            </div>
-        </Card>
+
+        </Card >
     )
 }

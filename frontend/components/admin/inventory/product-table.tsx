@@ -101,7 +101,7 @@ export function ProductTable({ products, onEditProduct, onDeleteProduct, onAddPr
       </div>
 
       {/* Desktop Table - Hidden on Mobile */}
-      <div className="hidden rounded-lg border border-border bg-card md:block">
+      <div className="hidden rounded-lg border border-border bg-card lg:block">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
@@ -201,7 +201,7 @@ export function ProductTable({ products, onEditProduct, onDeleteProduct, onAddPr
       </div>
 
       {/* Mobile Card View */}
-      <div className="space-y-4 md:hidden">
+      <div className="space-y-4 lg:hidden">
         {filteredProducts.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
             No products found
