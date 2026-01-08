@@ -241,72 +241,70 @@ export function DailySettlement() {
                                         Note too short. Minimum 5 characters required.
                                     </p>
                                 )}
-                            </p>
-                                )}
-                        </div>
+                            </div>
 
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={isSubmitting || !amountSubmitted}
-                            className="w-full bg-primary text-primary-foreground font-bold shadow-md hover:scale-[1.02] transition-transform"
-                        >
-                            {isSubmitting ? "Submitting..." : "Submit Deposit"}
-                        </Button>
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={isSubmitting || !amountSubmitted}
+                                className="w-full bg-primary text-primary-foreground font-bold shadow-md hover:scale-[1.02] transition-transform"
+                            >
+                                {isSubmitting ? "Submitting..." : "Submit Deposit"}
+                            </Button>
+                        </div>
                     </div>
-            </div>
-        </Card>
+                </Card>
             </div >
 
-        <Card className={`p-6 border-black/10 transition-colors shadow-sm ${newLifetimeBalance < lifetimeStats.balance && amountSubmitted ? 'bg-blue-50 border-blue-200' : 'bg-white'}`}>
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                    <div className="flex flex-col">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today's Result</p>
-                        <p className={`text-xl font-black font-mono ${currentDiscrepancy < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {currentDiscrepancy >= 0 ? '+' : ''}${currentDiscrepancy.toFixed(2)}
-                        </p>
+            <Card className={`p-6 border-black/10 transition-colors shadow-sm ${newLifetimeBalance < lifetimeStats.balance && amountSubmitted ? 'bg-blue-50 border-blue-200' : 'bg-white'}`}>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                        <div className="flex flex-col">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today's Result</p>
+                            <p className={`text-xl font-black font-mono ${currentDiscrepancy < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                {currentDiscrepancy >= 0 ? '+' : ''}${currentDiscrepancy.toFixed(2)}
+                            </p>
+                        </div>
+
+                        <ArrowRight className="size-6 text-muted-foreground" />
+
+                        <div className="flex flex-col">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">New Lifetime Balance</p>
+                            <p className={`text-2xl font-black font-mono ${newLifetimeBalance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                {newLifetimeBalance >= 0 ? '+' : ''}${newLifetimeBalance.toFixed(2)}
+                            </p>
+                        </div>
                     </div>
 
-                    <ArrowRight className="size-6 text-muted-foreground" />
-
-                    <div className="flex flex-col">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">New Lifetime Balance</p>
-                        <p className={`text-2xl font-black font-mono ${newLifetimeBalance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {newLifetimeBalance >= 0 ? '+' : ''}${newLifetimeBalance.toFixed(2)}
-                        </p>
-                    </div>
                 </div>
 
-            </div>
-        </div>
             </Card >
 
-    {
-        todaySubmissions.length > 0 && (
-            <div className="space-y-4">
-                <h3 className="font-bold flex items-center gap-2">
-                    <History className="size-4" />
-                    Today's Submission History
-                </h3>
-                <div className="grid gap-3">
-                    {todaySubmissions.map((sub, i) => (
-                        <Card key={sub.id} className="p-3 border-black/5 bg-white/50 flex justify-between items-center">
-                            <div className="flex items-center gap-4">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Submission #{i + 1}</span>
-                                    <span className="text-sm font-semibold">{new Date(sub.createdAt).toLocaleTimeString()}</span>
-                                </div>
-                                {sub.notes && <span className="text-xs italic text-muted-foreground border-l pl-3">"{sub.notes}"</span>}
-                            </div>
-                            <Badge variant="outline" className="font-mono text-primary border-primary/20">
-                                +${sub.amountSubmitted.toFixed(2)}
-                            </Badge>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        )
-    }
+            {
+                todaySubmissions.length > 0 && (
+                    <div className="space-y-4">
+                        <h3 className="font-bold flex items-center gap-2">
+                            <History className="size-4" />
+                            Today's Submission History
+                        </h3>
+                        <div className="grid gap-3">
+                            {todaySubmissions.map((sub, i) => (
+                                <Card key={sub.id} className="p-3 border-black/5 bg-white/50 flex justify-between items-center">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground uppercase font-bold">Submission #{i + 1}</span>
+                                            <span className="text-sm font-semibold">{new Date(sub.createdAt).toLocaleTimeString()}</span>
+                                        </div>
+                                        {sub.notes && <span className="text-xs italic text-muted-foreground border-l pl-3">"{sub.notes}"</span>}
+                                    </div>
+                                    <Badge variant="outline" className="font-mono text-primary border-primary/20">
+                                        +${sub.amountSubmitted.toFixed(2)}
+                                    </Badge>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )
+            }
         </div >
     )
 }
