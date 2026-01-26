@@ -21,8 +21,7 @@ interface CartProps {
 
 export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: CartProps) {
   const subtotal = items.reduce((sum, item) => sum + item.product.unitPrice * item.quantity, 0)
-  const tax = subtotal * 0.1 // 10% tax
-  const total = subtotal + tax
+  const total = subtotal
 
   return (
     <Card className="flex h-full flex-col border border-black/10 bg-white shadow-sm">
@@ -101,14 +100,6 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
 
       <div className="border-t border-black/10 bg-secondary p-6">
         <div className="mb-6 space-y-3 text-base">
-          <div className="flex justify-between text-muted-foreground">
-            <span>Subtotal</span>
-            <span className="font-mono">${subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-muted-foreground">
-            <span>Tax (10%)</span>
-            <span className="font-mono">${tax.toFixed(2)}</span>
-          </div>
           <div className="flex justify-between border-t border-border pt-3 text-xl font-bold text-foreground">
             <span>Total</span>
             <span className="font-mono">${total.toFixed(2)}</span>

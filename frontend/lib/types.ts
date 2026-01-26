@@ -29,6 +29,8 @@ export interface Product {
   expiryDate: string
   batchNumber: string
   location: string
+  countryOrigin?: string
+  description?: string
   requiresPrescription: boolean
   status: "active" | "archived"
   createdAt: string

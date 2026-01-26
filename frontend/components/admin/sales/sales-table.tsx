@@ -126,10 +126,14 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
           revenue: acc.revenue + sale.totalAmount,
           count: acc.count + 1,
           items: acc.items + sale.quantity,
-          profit: acc.profit + profit
+          profit: acc.profit + profit,
+          cashSales: acc.cashSales + (sale.paymentMethod === "cash" ? sale.quantity : 0),
+          mobileSales: acc.mobileSales + (sale.paymentMethod === "mobile banking" ? sale.quantity : 0),
+          cashRevenue: acc.cashRevenue + (sale.paymentMethod === "cash" ? sale.totalAmount : 0),
+          mobileRevenue: acc.mobileRevenue + (sale.paymentMethod === "mobile banking" ? sale.totalAmount : 0)
         }
       },
-      { revenue: 0, count: 0, items: 0, profit: 0 },
+      { revenue: 0, count: 0, items: 0, profit: 0, cashSales: 0, mobileSales: 0, cashRevenue: 0, mobileRevenue: 0 },
     )
   }, [filteredSales, products])
 
@@ -261,7 +265,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         <Card className="border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total Revenue</p>
           <p className="font-mono text-2xl font-bold text-foreground">${totals.revenue.toFixed(2)}</p>
@@ -283,6 +287,16 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
             ${totals.count > 0 ? (totals.revenue / totals.count).toFixed(2) : "0.00"}
           </p>
           <p className="text-xs text-muted-foreground">Per transaction</p>
+        </Card>
+        <Card className="border-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Cash Sales</p>
+          <p className="font-mono text-2xl font-bold text-foreground">${totals.cashRevenue.toFixed(2)}</p>
+          <p className="text-xs text-muted-foreground">{totals.cashSales} items sold</p>
+        </Card>
+        <Card className="border-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Mobile Banking Sales</p>
+          <p className="font-mono text-2xl font-bold text-foreground">${totals.mobileRevenue.toFixed(2)}</p>
+          <p className="text-xs text-muted-foreground">{totals.mobileSales} items sold</p>
         </Card>
       </div>
 

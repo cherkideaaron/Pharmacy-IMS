@@ -68,12 +68,6 @@ export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescr
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="card" id="card" />
-                <Label htmlFor="card" className="font-normal text-foreground">
-                  Card
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="mobile banking" id="mobile-banking" />
                 <Label htmlFor="mobile-banking" className="font-normal text-foreground">
                   Mobile Banking

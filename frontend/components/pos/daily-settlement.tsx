@@ -18,6 +18,8 @@ export function DailySettlement() {
     const addDeposit = useStore((state) => state.addDeposit)
     const { toast } = useToast()
 
+    const [historyFilter, setHistoryFilter] = useState<"today" | "last7days">("today")
+
     const [amountSubmitted, setAmountSubmitted] = useState<string>("")
     const [notes, setNotes] = useState("")
     const [submissionType, setSubmissionType] = useState<"revenue" | "debt">("revenue")
@@ -97,6 +99,50 @@ export function DailySettlement() {
         return deposits.filter(d => d.employeeId === currentUser?.id && d.date === today)
     }, [deposits, currentUser])
 
+    const filteredHistory = useMemo(() => {
+        const today = new Date()
+        const todayStr = today.toISOString().split('T')[0]
+        const sevenDaysAgo = new Date(today)
+        sevenDaysAgo.setDate(today.getDate() - 7)
+
+        return deposits
+            .filter(d => {
+                if (d.employeeId !== currentUser?.id) return false
+                if (historyFilter === "today") return d.date === todayStr
+                const dDate = new Date(d.date)
+                return dDate >= sevenDaysAgo && dDate <= today
+            })
+            // Sort by date/time descending (assuming natural order or add sort if needed)
+            .reverse()
+    }, [deposits, currentUser, historyFilter])
+
+    const filteredSalesData = useMemo(() => {
+        const today = new Date()
+        const todayStr = today.toISOString().split('T')[0]
+        const sevenDaysAgo = new Date(today)
+        sevenDaysAgo.setDate(today.getDate() - 7)
+
+        return sales
+            .filter(s => {
+                if (s.employeeId !== currentUser?.id) return false
+                const sDate = new Date(s.timestamp)
+                const sDateStr = s.timestamp.split('T')[0]
+
+                if (historyFilter === "today") return sDateStr === todayStr
+                return sDate >= sevenDaysAgo && sDate <= today
+            })
+            // Sort by most recent
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    }, [sales, currentUser, historyFilter])
+
+    const filteredStats = useMemo(() => {
+        return filteredSalesData.reduce((acc, s) => ({
+            items: acc.items + s.quantity,
+            cashRev: acc.cashRev + (s.paymentMethod === "cash" ? s.totalAmount : 0),
+            mobileRev: acc.mobileRev + (s.paymentMethod === "mobile banking" ? s.totalAmount : 0)
+        }), { items: 0, cashRev: 0, mobileRev: 0 })
+    }, [filteredSalesData])
+
     // Lifetime Balance Calculation (Sales + Debt Payments - Deposits)
     const lifetimeStats = useMemo(() => {
         if (!currentUser) return { expected: 0, submitted: 0, balance: 0 }
@@ -133,18 +179,60 @@ export function DailySettlement() {
     return (
         <div className="flex flex-col gap-6 h-full max-w-5xl mx-auto py-8">
             <div className="flex flex-col gap-2">
-                <h2 className="text-2xl font-bold text-foreground">Daily Bank Settlement</h2>
-                <p className="text-muted-foreground">Record the amount of cash you've submitted to the bank today. Your lifetime balance tracks all shortages and excesses.</p>
+                <h2 className="text-2xl font-bold text-foreground">Daily Bank Settlement & History</h2>
+                <p className="text-muted-foreground">Manage deposits and view your sales performance.</p>
             </div>
 
+            {/* Performance Summary Cards (New) */}
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-foreground">Sales Performance</h3>
+                    <div className="flex p-0.5 bg-zinc-100 rounded-lg">
+                        <button
+                            onClick={() => setHistoryFilter("today")}
+                            className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-all ${historyFilter === "today" ? 'bg-white text-primary shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                        >
+                            Today
+                        </button>
+                        <button
+                            onClick={() => setHistoryFilter("last7days")}
+                            className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-all ${historyFilter === "last7days" ? 'bg-white text-primary shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                        >
+                            Last 7 Days
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                    <Card className="p-4 border-black/10 bg-white shadow-sm">
+                        <p className="text-xs text-muted-foreground uppercase font-bold">Items Sold</p>
+                        <p className="text-2xl font-mono font-black text-foreground">{filteredStats.items}</p>
+                    </Card>
+                    <Card className="p-4 border-black/10 bg-white shadow-sm">
+                        <p className="text-xs text-muted-foreground uppercase font-bold">Cash Revenue</p>
+                        <p className="text-2xl font-mono font-black text-foreground">${filteredStats.cashRev.toFixed(2)}</p>
+                    </Card>
+                    <Card className="p-4 border-black/10 bg-white shadow-sm">
+                        <p className="text-xs text-muted-foreground uppercase font-bold">Mobile Revenue</p>
+                        <p className="text-2xl font-mono font-black text-foreground">${filteredStats.mobileRev.toFixed(2)}</p>
+                    </Card>
+                </div>
+            </div>
+
+            {/* Existing Settlement Cards */}
             <div className="grid gap-6 md:grid-cols-3">
+                {/* ... (Keep Today's Summary and Lifetime Balance cards as is, maybe rename Today's Summary if confusing, but user didn't ask to change logic there, just add new boxes) ... */}
+                {/* Actually, user said "show history (which is displaying only for today) let's also make it display the history for the past week". 
+                    The existing logic for settlement is strictly "Today". I will keep the main settlement functionality focused on "Today" because "Daily Settlement" implies daily action.
+                    The new section above handles the "Performance History" view requested. 
+                */}
                 <Card className="p-6 border-black/10 bg-white shadow-sm flex flex-col justify-between">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="rounded-full bg-zinc-100 p-2 text-zinc-600">
                                 <Banknote className="size-5" />
                             </div>
-                            <h3 className="font-semibold text-sm">Today's Summary</h3>
+                            <h3 className="font-semibold text-sm">Today's Settlement Status</h3>
                         </div>
                         <div className="space-y-4">
                             <div>
@@ -160,6 +248,7 @@ export function DailySettlement() {
                 </Card>
 
                 <Card className={`p-6 border-black/10 shadow-sm flex flex-col justify-between transition-colors ${lifetimeStats.balance < 0 ? 'bg-red-50/50' : 'bg-green-50/50'}`}>
+                    {/* ... Lifetime Balance content ... */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="rounded-full bg-zinc-600 text-white p-2">
@@ -181,6 +270,7 @@ export function DailySettlement() {
                 </Card>
 
                 <Card className="p-6 border-black/10 bg-white shadow-sm flex flex-col">
+                    {/* ... Keep Submit Form ... */}
                     <div className="space-y-4 flex-1">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -279,32 +369,77 @@ export function DailySettlement() {
 
             </Card >
 
-            {
-                todaySubmissions.length > 0 && (
-                    <div className="space-y-4">
-                        <h3 className="font-bold flex items-center gap-2">
-                            <History className="size-4" />
-                            Today's Submission History
-                        </h3>
-                        <div className="grid gap-3">
-                            {todaySubmissions.map((sub, i) => (
-                                <Card key={sub.id} className="p-3 border-black/5 bg-white/50 flex justify-between items-center">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] text-muted-foreground uppercase font-bold">Submission #{i + 1}</span>
-                                            <span className="text-sm font-semibold">{new Date(sub.createdAt).toLocaleTimeString()}</span>
-                                        </div>
-                                        {sub.notes && <span className="text-xs italic text-muted-foreground border-l pl-3">"{sub.notes}"</span>}
+            {/* Sales History List (New) */}
+            <div className="space-y-4">
+                <h3 className="font-bold flex items-center gap-2">
+                    <Receipt className="size-4" />
+                    Sales History ({historyFilter === 'today' ? "Today" : "Last 7 Days"})
+                </h3>
+                {filteredSalesData.length > 0 ? (
+                    <div className="grid gap-2">
+                        {filteredSalesData.map((sale) => (
+                            <Card key={sale.id} className="p-3 border-black/5 bg-white/50 flex justify-between items-center hover:bg-white transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                                            {new Date(sale.timestamp).toLocaleDateString()} {new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                        <span className="text-sm font-semibold">{sale.productName} <span className="text-muted-foreground font-normal">x{sale.quantity}</span></span>
                                     </div>
-                                    <Badge variant="outline" className="font-mono text-primary border-primary/20">
+                                </div>
+                                <div className="flex flex-col items-end gap-1">
+                                    <Badge variant="outline" className={`font-mono border-black/10 ${sale.paymentMethod === 'mobile banking' ? 'bg-blue-50 text-blue-700' : 'bg-zinc-50 text-zinc-700'}`}>
+                                        {sale.paymentMethod === 'mobile banking' ? 'Mobile' : 'Cash'}
+                                    </Badge>
+                                    <span className="text-sm font-bold font-mono">${sale.totalAmount.toFixed(2)}</span>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-6 text-muted-foreground text-sm border border-dashed rounded-lg bg-zinc-50">
+                        No sales found for this period.
+                    </div>
+                )}
+            </div>
+
+            {/* Submission History List */}
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <h3 className="font-bold flex items-center gap-2">
+                        <History className="size-4" />
+                        Submission History ({historyFilter === 'today' ? "Today" : "Last 7 Days"})
+                    </h3>
+                </div>
+
+                {filteredHistory.length > 0 ? (
+                    <div className="grid gap-3">
+                        {filteredHistory.map((sub, i) => (
+                            <Card key={sub.id} className="p-3 border-black/5 bg-white/50 flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                                            {new Date(sub.date).toLocaleDateString()}
+                                        </span>
+                                        <span className="text-sm font-semibold">{new Date(sub.createdAt).toLocaleTimeString()}</span>
+                                    </div>
+                                    {sub.notes && <span className="text-xs italic text-muted-foreground border-l pl-3">"{sub.notes}"</span>}
+                                </div>
+                                <div className="text-right">
+                                    <Badge variant="outline" className="font-mono text-primary border-primary/20 block mb-1">
                                         +${sub.amountSubmitted.toFixed(2)}
                                     </Badge>
-                                </Card>
-                            ))}
-                        </div>
+                                    <span className="text-[10px] text-muted-foreground">Exp: ${sub.cashRevenue.toFixed(2)}</span>
+                                </div>
+                            </Card>
+                        ))}
                     </div>
-                )
-            }
+                ) : (
+                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg bg-zinc-50">
+                        No submissions found for this period.
+                    </div>
+                )}
+            </div>
         </div >
     )
 }

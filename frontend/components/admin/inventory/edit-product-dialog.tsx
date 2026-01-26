@@ -86,7 +86,7 @@ export function EditProductDialog({ product, open, onClose, onSave }: EditProduc
                 Category
               </Label>
               <Select
-                value={formData.category || ""}
+                value={formData.category || "Antibiotics"}
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
               >
                 <SelectTrigger className="bg-secondary border-border text-foreground">
@@ -94,11 +94,10 @@ export function EditProductDialog({ product, open, onClose, onSave }: EditProduc
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Antibiotics">Antibiotics</SelectItem>
-                  <SelectItem value="Pain Relief">Pain Relief</SelectItem>
-                  <SelectItem value="Cardiovascular">Cardiovascular</SelectItem>
-                  <SelectItem value="Diabetes">Diabetes</SelectItem>
-                  <SelectItem value="Respiratory">Respiratory</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="Dewormer">Dewormer</SelectItem>
+                  <SelectItem value="Egg vitamins">Egg vitamins</SelectItem>
+                  <SelectItem value="Supplement">Supplement</SelectItem>
+                  <SelectItem value="Non-egg vitamins">Non-egg vitamins</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -121,30 +120,35 @@ export function EditProductDialog({ product, open, onClose, onSave }: EditProduc
                 Dosage Form
               </Label>
               <Select
-                value={formData.dosageForm || ""}
+                value={formData.dosageForm || "Sachet"}
                 onValueChange={(value) => setFormData({ ...formData, dosageForm: value })}
               >
                 <SelectTrigger className="bg-secondary border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Tablet">Tablet</SelectItem>
-                  <SelectItem value="Capsule">Capsule</SelectItem>
-                  <SelectItem value="Syrup">Syrup</SelectItem>
+                  <SelectItem value="Sachet">Sachet</SelectItem>
+                  <SelectItem value="Powder">Powder</SelectItem>
                   <SelectItem value="Injection">Injection</SelectItem>
+                  <SelectItem value="Oral">Oral</SelectItem>
+                  <SelectItem value="Intra-mammary">Intra-mammary</SelectItem>
+                  <SelectItem value="Spray">Spray</SelectItem>
+                  <SelectItem value="Foot-bath">Foot-bath</SelectItem>
                   <SelectItem value="Cream">Cream</SelectItem>
+                  <SelectItem value="Eye drop">Eye drop</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location" className="text-foreground">
-                Location
+              <Label htmlFor="countryOrigin" className="text-foreground">
+                Country
               </Label>
               <Input
-                id="location"
-                value={formData.location || ""}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                id="countryOrigin"
+                value={formData.countryOrigin || ""}
+                onChange={(e) => setFormData({ ...formData, countryOrigin: e.target.value })}
                 className="bg-secondary border-border text-foreground"
+                placeholder="e.g., USA"
               />
             </div>
           </div>
@@ -226,6 +230,19 @@ export function EditProductDialog({ product, open, onClose, onSave }: EditProduc
                 className="bg-secondary border-border text-foreground"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-foreground">
+              Description / Prescription Details
+            </Label>
+            <textarea
+              id="description"
+              value={formData.description || ""}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="flex min-h-[80px] w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+              placeholder="Enter medicine description, usage instructions, or prescription details..."
+            />
           </div>
 
           <div className="flex items-center space-x-2">
