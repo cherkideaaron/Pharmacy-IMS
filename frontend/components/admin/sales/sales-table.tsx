@@ -7,10 +7,20 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Sale, Product } from "@/lib/types"
-import { Search, Download, Calendar } from "lucide-react"
+import { Search, Download, Calendar, Trash2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { startOfMonth, endOfMonth, format } from "date-fns"
 import { useStore } from "@/lib/store"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface SalesTableProps {
   sales: Sale[]
@@ -18,6 +28,8 @@ interface SalesTableProps {
 }
 
 export function SalesTable({ sales, products = [] }: SalesTableProps) {
+  const currentUser = useStore((state) => state.currentUser)
+  const deleteSale = useStore((state) => state.deleteSale)
   const getSalesByDateRange = useStore((state) => state.getSalesByDateRange)
   const [viewSales, setViewSales] = useState<Sale[]>(sales)
   const [search, setSearch] = useState("")
@@ -26,6 +38,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
   const [selectedYear, setSelectedYear] = useState<string>("all")
   const [selectedMonth, setSelectedMonth] = useState<string>("all")
   const [isLoading, setIsLoading] = useState(false)
+  const [saleToDelete, setSaleToDelete] = useState<string | null>(null)
 
   // Update viewSales when props.sales changes (only if not filtering by specific month/year)
   useEffect(() => {
@@ -142,6 +155,19 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
     return {
       date: date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       time: date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (saleToDelete) {
+      try {
+        await deleteSale(saleToDelete)
+        setSaleToDelete(null)
+      } catch (error) {
+        console.error("Failed to delete sale:", error)
+        // Keep the dialog open or show error separate? 
+        // For simplicity, we'll just log it. Maybe set error state if UI needed.
+      }
     }
   }
 
@@ -314,14 +340,19 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
               <TableHead className="text-foreground">Customer</TableHead>
               <TableHead className="text-foreground">Prescription</TableHead>
               <TableHead className="text-foreground">Notes</TableHead>
+              {currentUser?.role === "admin" && (
+                <TableHead className="text-foreground w-[50px]"></TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredSales.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
-                  No sales found
-                </TableCell>
+                <TableRow>
+                  <TableCell colSpan={currentUser?.role === "admin" ? 10 : 9} className="h-24 text-center text-muted-foreground">
+                    No sales found
+                  </TableCell>
+                </TableRow>
               </TableRow>
             ) : (
               filteredSales.map((sale) => {
@@ -361,6 +392,18 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
                     <TableCell className="max-w-[200px] truncate text-xs text-muted-foreground italic" title={sale.notes}>
                       {sale.notes || "—"}
                     </TableCell>
+                    {currentUser?.role === "admin" && (
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                          onClick={() => setSaleToDelete(sale.id)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 )
               })
@@ -389,6 +432,16 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
                     </div>
                   </div>
                   <Badge variant="outline" className="capitalize border-border text-foreground">{sale.paymentMethod}</Badge>
+                  {currentUser?.role === "admin" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive/90 hover:bg-destructive/10 -mt-1 -mr-2"
+                      onClick={() => setSaleToDelete(sale.id)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -432,6 +485,26 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
         </p>
         <p>Total: ${totals.revenue.toFixed(2)}</p>
       </div>
+
+      <AlertDialog open={!!saleToDelete} onOpenChange={(open) => !open && setSaleToDelete(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              This will permanently delete this sale record. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border bg-transparent text-foreground hover:bg-secondary">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div >
   )
 }

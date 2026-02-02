@@ -32,6 +32,7 @@ interface AppState {
   sales: Sale[]
   addSale: (sale: Omit<Sale, "id" | "timestamp">) => Promise<void>
   getSalesByDateRange: (startDate: string, endDate: string) => Promise<Sale[]>
+  deleteSale: (id: string) => Promise<void>
 
   // Audit logs
   auditLogs: AuditLog[]
@@ -405,6 +406,22 @@ export const useStore = create<AppState>((set, get) => ({
       }))
     }
     return []
+  },
+
+  deleteSale: async (id: string) => {
+    const { error } = await supabase
+      .from("sales")
+      .delete()
+      .eq("id", id)
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    await get().fetchSales()
+    // Also refresh deposits as sales might affect daily totals potentially?
+    // Not directly linked in code shown, but good practice if needed.
   },
 
   deleteProduct: async (id: string) => {
