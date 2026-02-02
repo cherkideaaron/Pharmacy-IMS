@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { AuditLog } from "@/lib/types"
-import { Search, ShoppingCart, Package, Plus, Edit, LogIn, LogOut, Activity } from "lucide-react"
+import { Search, ShoppingCart, Package, Plus, Edit, LogIn, LogOut, Activity, Truck } from "lucide-react"
 
 interface AuditTableProps {
   logs: AuditLog[]
@@ -21,6 +21,7 @@ const actionIcons: Record<AuditLog["action"], any> = {
   logout: LogOut,
   customer_added: Plus,
   debt_updated: Activity,
+  wholesaler_action: Truck,
 }
 
 const actionColors: Record<AuditLog["action"], string> = {
@@ -32,6 +33,7 @@ const actionColors: Record<AuditLog["action"], string> = {
   logout: "bg-gray-500/10 text-gray-400 border-gray-500/20",
   customer_added: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
   debt_updated: "bg-rose-500/10 text-rose-500 border-rose-500/20",
+  wholesaler_action: "bg-orange-500/10 text-orange-500 border-orange-500/20",
 }
 
 export function AuditTable({ logs }: AuditTableProps) {
@@ -108,6 +110,7 @@ export function AuditTable({ logs }: AuditTableProps) {
             <SelectItem value="product_updated">Products Updated</SelectItem>
             <SelectItem value="login">Logins</SelectItem>
             <SelectItem value="logout">Logouts</SelectItem>
+            <SelectItem value="wholesaler_action">Wholesalers</SelectItem>
           </SelectContent>
         </Select>
       </div>
