@@ -159,6 +159,8 @@ export const useStore = create<AppState>((set, get) => ({
         expiryDate: p.expiry_date,
         batchNumber: p.batch_number,
         location: p.location,
+        countryOrigin: p.country_origin,
+        description: p.description,
         requiresPrescription: p.requires_prescription,
         status: p.status,
         createdAt: p.created_at,
@@ -277,6 +279,8 @@ export const useStore = create<AppState>((set, get) => ({
       expiry_date: product.expiryDate,
       batch_number: product.batchNumber,
       location: product.location,
+      country_origin: product.countryOrigin,
+      description: product.description,
       requires_prescription: product.requiresPrescription
     }
 
@@ -309,6 +313,8 @@ export const useStore = create<AppState>((set, get) => ({
     if (updates.expiryDate) dbUpdates.expiry_date = updates.expiryDate
     if (updates.batchNumber) dbUpdates.batch_number = updates.batchNumber
     if (updates.location) dbUpdates.location = updates.location
+    if (updates.countryOrigin) dbUpdates.country_origin = updates.countryOrigin
+    if (updates.description !== undefined) dbUpdates.description = updates.description
     if (updates.requiresPrescription !== undefined) dbUpdates.requires_prescription = updates.requiresPrescription
 
     const { error } = await supabase.from("products").update(dbUpdates).eq("id", id)
@@ -343,9 +349,11 @@ export const useStore = create<AppState>((set, get) => ({
       customer_name: sale.customerName
     }
 
+    console.log("Submitting sale:", dbSale)
     const { error } = await supabase.from("sales").insert(dbSale)
 
     if (error) {
+      console.error("Supabase sale insert error:", error)
       set({ error: error.message })
       throw error
     }

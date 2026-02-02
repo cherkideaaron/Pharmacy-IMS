@@ -128,9 +128,9 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
           items: acc.items + sale.quantity,
           profit: acc.profit + profit,
           cashSales: acc.cashSales + (sale.paymentMethod === "cash" ? sale.quantity : 0),
-          mobileSales: acc.mobileSales + (sale.paymentMethod === "mobile banking" ? sale.quantity : 0),
+          mobileSales: acc.mobileSales + (sale.paymentMethod === "mobile_banking" ? sale.quantity : 0),
           cashRevenue: acc.cashRevenue + (sale.paymentMethod === "cash" ? sale.totalAmount : 0),
-          mobileRevenue: acc.mobileRevenue + (sale.paymentMethod === "mobile banking" ? sale.totalAmount : 0)
+          mobileRevenue: acc.mobileRevenue + (sale.paymentMethod === "mobile_banking" ? sale.totalAmount : 0)
         }
       },
       { revenue: 0, count: 0, items: 0, profit: 0, cashSales: 0, mobileSales: 0, cashRevenue: 0, mobileRevenue: 0 },
@@ -251,7 +251,7 @@ export function SalesTable({ sales, products = [] }: SalesTableProps) {
           <SelectContent>
             <SelectItem value="all">All Payments</SelectItem>
             <SelectItem value="cash">Cash</SelectItem>
-            <SelectItem value="mobile banking">Mobile Banking</SelectItem>
+            <SelectItem value="mobile_banking">Mobile Banking</SelectItem>
           </SelectContent>
         </Select>
         <Button

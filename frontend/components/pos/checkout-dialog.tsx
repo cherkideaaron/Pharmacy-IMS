@@ -19,14 +19,14 @@ import type { Customer } from "@/lib/types"
 interface CheckoutDialogProps {
   open: boolean
   onClose: () => void
-  onConfirm: (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string, customerId?: string, customerName?: string) => void
+  onConfirm: (paymentMethod: "cash" | "card" | "mobile_banking", prescriptionNumber?: string, notes?: string, customerId?: string, customerName?: string) => void
   total: number
   requiresPrescription: boolean
   customers: Customer[]
 }
 
 export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescription, customers }: CheckoutDialogProps) {
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "mobile banking">("cash")
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "mobile_banking">("cash")
   const [prescriptionNumber, setPrescriptionNumber] = useState("")
   const [notes, setNotes] = useState("")
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("")
@@ -59,7 +59,7 @@ export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescr
             <Label className="text-foreground">Payment Method</Label>
             <RadioGroup
               value={paymentMethod}
-              onValueChange={(value) => setPaymentMethod(value as "cash" | "card" | "mobile banking")}
+              onValueChange={(value) => setPaymentMethod(value as "cash" | "card" | "mobile_banking")}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="cash" id="cash" />
@@ -68,7 +68,7 @@ export function CheckoutDialog({ open, onClose, onConfirm, total, requiresPrescr
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="mobile banking" id="mobile-banking" />
+                <RadioGroupItem value="mobile_banking" id="mobile-banking" />
                 <Label htmlFor="mobile-banking" className="font-normal text-foreground">
                   Mobile Banking
                 </Label>

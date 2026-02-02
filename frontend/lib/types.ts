@@ -47,7 +47,7 @@ export interface Sale {
   employeeId: string
   employeeName: string
   timestamp: string
-  paymentMethod: "cash" | "card" | "mobile banking"
+  paymentMethod: "cash" | "card" | "mobile_banking"
   prescriptionNumber?: string
   notes?: string
   customerId?: string

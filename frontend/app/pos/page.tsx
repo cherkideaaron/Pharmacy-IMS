@@ -99,7 +99,7 @@ export default function POSPage() {
     setCheckoutOpen(true)
   }
 
-  const handleConfirmCheckout = async (paymentMethod: "cash" | "card" | "mobile banking", prescriptionNumber?: string, notes?: string, customerId?: string, customerName?: string) => {
+  const handleConfirmCheckout = async (paymentMethod: "cash" | "card" | "mobile_banking", prescriptionNumber?: string, notes?: string, customerId?: string, customerName?: string) => {
     const requiresPrescription = cartItems.some((item) => item.product.requiresPrescription)
 
     if (requiresPrescription && !prescriptionNumber) {
@@ -145,10 +145,11 @@ export default function POSPage() {
 
       setCartItems([])
       setCheckoutOpen(false)
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Payment failed:", error)
       toast({
         title: "Transaction failed",
-        description: "There was an error processing the sale",
+        description: error.message || "There was an error processing the sale",
         variant: "destructive",
       })
     }

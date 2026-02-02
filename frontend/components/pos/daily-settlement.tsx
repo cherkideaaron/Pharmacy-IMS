@@ -139,7 +139,7 @@ export function DailySettlement() {
         return filteredSalesData.reduce((acc, s) => ({
             items: acc.items + s.quantity,
             cashRev: acc.cashRev + (s.paymentMethod === "cash" ? s.totalAmount : 0),
-            mobileRev: acc.mobileRev + (s.paymentMethod === "mobile banking" ? s.totalAmount : 0)
+            mobileRev: acc.mobileRev + (s.paymentMethod === "mobile_banking" ? s.totalAmount : 0)
         }), { items: 0, cashRev: 0, mobileRev: 0 })
     }, [filteredSalesData])
 
@@ -388,8 +388,8 @@ export function DailySettlement() {
                                     </div>
                                 </div>
                                 <div className="flex flex-col items-end gap-1">
-                                    <Badge variant="outline" className={`font-mono border-black/10 ${sale.paymentMethod === 'mobile banking' ? 'bg-blue-50 text-blue-700' : 'bg-zinc-50 text-zinc-700'}`}>
-                                        {sale.paymentMethod === 'mobile banking' ? 'Mobile' : 'Cash'}
+                                    <Badge variant="outline" className={`font-mono border-black/10 ${sale.paymentMethod === 'mobile_banking' ? 'bg-blue-50 text-blue-700' : 'bg-zinc-50 text-zinc-700'}`}>
+                                        {sale.paymentMethod === 'mobile_banking' ? 'Mobile' : 'Cash'}
                                     </Badge>
                                     <span className="text-sm font-bold font-mono">${sale.totalAmount.toFixed(2)}</span>
                                 </div>
