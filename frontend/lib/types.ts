@@ -58,7 +58,7 @@ export interface AuditLog {
   id: string
   userId: string
   userName: string
-  action: "sale" | "stock_adjustment" | "product_added" | "product_updated" | "login" | "logout" | "customer_added" | "debt_updated"
+  action: "sale" | "stock_adjustment" | "product_added" | "product_updated" | "login" | "logout" | "customer_added" | "debt_updated" | "wholesaler_action"
   details: string
   timestamp: string
   metadata?: Record<string, unknown>
@@ -90,4 +90,16 @@ export interface DailyDeposit {
   amountSubmitted: number
   notes?: string
   createdAt: string
+}
+
+export interface Wholesaler {
+  id: string
+  name: string
+  contactPerson?: string
+  phone?: string
+  email?: string
+  address?: string
+  balance: number
+  createdAt: string
+  updatedAt: string
 }

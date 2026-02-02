@@ -14,11 +14,14 @@ import { AuditTable } from "@/components/admin/audit/audit-table"
 import { AddProductDialog } from "@/components/admin/inventory/add-product-dialog"
 import { ExpiringItemsDialog } from "@/components/admin/expiring-items-dialog"
 import { AdminSettlementHistory } from "@/components/admin/settlement-history"
+import { WholesalerTable } from "@/components/admin/wholesalers/wholesaler-table"
+import { AddWholesalerDialog } from "@/components/admin/wholesalers/add-wholesaler-dialog"
+import { EditWholesalerDialog } from "@/components/admin/wholesalers/edit-wholesaler-dialog"
 import { useStore } from "@/lib/store"
 import { useToast } from "@/hooks/use-toast"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { Product } from "@/lib/types"
+import type { Product, Wholesaler } from "@/lib/types"
 import { DollarSign, TrendingUp, ShoppingCart, Calendar, Landmark, AlertCircle, Banknote, ArrowRight, CheckCircle2, Plus, History, Menu, LayoutDashboard } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
@@ -42,11 +45,21 @@ export default function AdminPage() {
   const fetchDeposits = useStore((state) => state.fetchDeposits)
   const deposits = useStore((state) => state.deposits)
 
+  const fetchWholesalers = useStore((state) => state.fetchWholesalers)
+  const wholesalers = useStore((state) => state.wholesalers)
+  const addWholesaler = useStore((state) => state.addWholesaler)
+  const updateWholesaler = useStore((state) => state.updateWholesaler)
+  const deleteWholesaler = useStore((state) => state.deleteWholesaler)
+
   const [activeTab, setActiveTab] = useState("overview")
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [expiringDialogOpen, setExpiringDialogOpen] = useState(false)
+
+  const [editingWholesaler, setEditingWholesaler] = useState<Wholesaler | null>(null)
+  const [editWholesalerDialogOpen, setEditWholesalerDialogOpen] = useState(false)
+  const [addWholesalerDialogOpen, setAddWholesalerDialogOpen] = useState(false)
 
   // Initial data fetch
   useEffect(() => {
@@ -54,7 +67,8 @@ export default function AdminPage() {
     fetchSales()
     fetchAuditLogs()
     fetchDeposits()
-  }, [fetchProducts, fetchSales, fetchAuditLogs, fetchDeposits])
+    fetchWholesalers()
+  }, [fetchProducts, fetchSales, fetchAuditLogs, fetchDeposits, fetchWholesalers])
 
   useEffect(() => {
     if (!currentUser || currentUser.role !== "admin") {
@@ -201,6 +215,63 @@ export default function AdminPage() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete product",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Wholesaler Handlers
+  const handleEditWholesaler = (wholesaler: Wholesaler) => {
+    setEditingWholesaler(wholesaler)
+    setEditWholesalerDialogOpen(true)
+  }
+
+  const handleAddWholesaler = async (wholesaler: Omit<Wholesaler, "id" | "createdAt" | "updatedAt">) => {
+    try {
+      await addWholesaler(wholesaler)
+      toast({
+        title: "Wholesaler added",
+        description: `${wholesaler.name} has been added successfully`,
+      })
+      setAddWholesalerDialogOpen(false)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add wholesaler",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleSaveWholesaler = async (id: string, updates: Partial<Wholesaler>) => {
+    try {
+      await updateWholesaler(id, updates)
+      toast({
+        title: "Wholesaler updated",
+        description: "Wholesaler details have been updated",
+      })
+      setEditWholesalerDialogOpen(false)
+      setEditingWholesaler(null)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update wholesaler",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteWholesaler = async (wholesaler: Wholesaler) => {
+    try {
+      await deleteWholesaler(wholesaler.id)
+      toast({
+        title: "Wholesaler deleted",
+        description: `${wholesaler.name} has been removed`,
+      })
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete wholesaler",
         variant: "destructive",
       })
     }
@@ -377,6 +448,21 @@ export default function AdminPage() {
             <AuditTable logs={auditLogs} />
           </div>
         )}
+
+        {activeTab === "wholesalers" && (
+          <div className="p-8 space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Wholesaler Management</h1>
+              <p className="text-muted-foreground">Manage suppliers and track debts/credits</p>
+            </div>
+            <WholesalerTable
+              wholesalers={wholesalers}
+              onEdit={handleEditWholesaler}
+              onDelete={handleDeleteWholesaler}
+              onAdd={() => setAddWholesalerDialogOpen(true)}
+            />
+          </div>
+        )}
       </main>
 
       <EditProductDialog
@@ -393,6 +479,22 @@ export default function AdminPage() {
       <AddProductDialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} onSave={handleAddProduct} />
 
       <ExpiringItemsDialog products={products} open={expiringDialogOpen} onClose={() => setExpiringDialogOpen(false)} />
+
+      <AddWholesalerDialog
+        open={addWholesalerDialogOpen}
+        onClose={() => setAddWholesalerDialogOpen(false)}
+        onSave={handleAddWholesaler}
+      />
+
+      <EditWholesalerDialog
+        wholesaler={editingWholesaler}
+        open={editWholesalerDialogOpen}
+        onClose={() => {
+          setEditWholesalerDialogOpen(false)
+          setEditingWholesaler(null)
+        }}
+        onSave={handleSaveWholesaler}
+      />
     </div>
   )
 }

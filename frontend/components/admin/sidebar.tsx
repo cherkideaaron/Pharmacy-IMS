@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Package, ShoppingCart, FileText, LogOut } from "lucide-react"
+import { LayoutDashboard, Package, ShoppingCart, FileText, LogOut, Truck } from "lucide-react"
 
 interface SidebarProps {
   activeTab: string
@@ -17,6 +17,7 @@ export function Sidebar({ activeTab, onTabChange, onLogout, userName, className,
     { id: "inventory", label: "Inventory", icon: Package },
     { id: "sales", label: "Sales History", icon: ShoppingCart },
     { id: "audit", label: "Audit Logs", icon: FileText },
+    { id: "wholesalers", label: "Wholesalers", icon: Truck },
   ]
 
   const handleTabChange = (id: string) => {

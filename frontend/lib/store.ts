@@ -2,7 +2,7 @@
 
 import { create } from "zustand"
 import { supabase } from "./supabase"
-import type { User, Product, Sale, AuditLog } from "./types"
+import type { User, Product, Sale, AuditLog, Wholesaler } from "./types"
 
 interface AppState {
   // Auth
@@ -45,6 +45,13 @@ interface AppState {
   // Deposits
   deposits: import("./types").DailyDeposit[]
   addDeposit: (deposit: Omit<import("./types").DailyDeposit, "id" | "createdAt">) => Promise<void>
+
+  // Wholesalers
+  wholesalers: Wholesaler[]
+  fetchWholesalers: () => Promise<void>
+  addWholesaler: (wholesaler: Omit<Wholesaler, "id" | "createdAt" | "updatedAt">) => Promise<void>
+  updateWholesaler: (id: string, updates: Partial<Wholesaler>) => Promise<void>
+  deleteWholesaler: (id: string) => Promise<void>
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -57,6 +64,7 @@ export const useStore = create<AppState>((set, get) => ({
   auditLogs: [],
   customers: [],
   deposits: [],
+  wholesalers: [],
 
   // Auth
   setCurrentUser: (user) => set({ currentUser: user }),
@@ -505,5 +513,120 @@ export const useStore = create<AppState>((set, get) => ({
     }
 
     await get().fetchDeposits()
+  },
+
+  // Wholesaler Actions
+  fetchWholesalers: async () => {
+    const { data, error } = await supabase
+      .from("wholesalers")
+      .select("*")
+      .order("name")
+
+    if (!error && data) {
+      const mappedWholesalers: Wholesaler[] = data.map(w => ({
+        id: w.id,
+        name: w.name,
+        contactPerson: w.contact_person,
+        phone: w.phone,
+        email: w.email,
+        address: w.address,
+        balance: w.balance,
+        createdAt: w.created_at,
+        updatedAt: w.updated_at
+      }))
+      set({ wholesalers: mappedWholesalers })
+    }
+  },
+
+  addWholesaler: async (wholesaler) => {
+    const user = get().currentUser
+    const dbWholesaler = {
+      name: wholesaler.name,
+      contact_person: wholesaler.contactPerson,
+      phone: wholesaler.phone,
+      email: wholesaler.email,
+      address: wholesaler.address,
+      balance: wholesaler.balance
+    }
+
+    const { error } = await supabase.from("wholesalers").insert(dbWholesaler)
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    if (user) {
+      await get().addAuditLog({
+        userId: user.id,
+        userName: user.name,
+        action: "wholesaler_action",
+        details: `Added new wholesaler: ${wholesaler.name}`
+      })
+    }
+
+    await get().fetchWholesalers()
+  },
+
+  updateWholesaler: async (id, updates) => {
+    const user = get().currentUser
+    const currentWholesaler = get().wholesalers.find(w => w.id === id)
+
+    // Map updates to snake_case
+    const dbUpdates: any = {}
+    if (updates.name) dbUpdates.name = updates.name
+    if (updates.contactPerson) dbUpdates.contact_person = updates.contactPerson
+    if (updates.phone) dbUpdates.phone = updates.phone
+    if (updates.email) dbUpdates.email = updates.email
+    if (updates.address) dbUpdates.address = updates.address
+    if (updates.balance !== undefined) dbUpdates.balance = updates.balance
+
+    const { error } = await supabase.from("wholesalers").update(dbUpdates).eq("id", id)
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    if (user && currentWholesaler) {
+      let details = `Updated wholesaler: ${currentWholesaler.name}`
+      if (updates.balance !== undefined && updates.balance !== currentWholesaler.balance) {
+        details += `. Balance changed from ${currentWholesaler.balance} to ${updates.balance}`
+      }
+
+      await get().addAuditLog({
+        userId: user.id,
+        userName: user.name,
+        action: "wholesaler_action",
+        details: details,
+        metadata: { wholesalerId: id, updates }
+      })
+    }
+
+    await get().fetchWholesalers()
+  },
+
+  deleteWholesaler: async (id) => {
+    const user = get().currentUser
+    const wholesaler = get().wholesalers.find(w => w.id === id)
+
+    const { error } = await supabase.from("wholesalers").delete().eq("id", id)
+
+    if (error) {
+      set({ error: error.message })
+      throw error
+    }
+
+    if (user && wholesaler) {
+      await get().addAuditLog({
+        userId: user.id,
+        userName: user.name,
+        action: "wholesaler_action",
+        details: `Deleted wholesaler: ${wholesaler.name}`
+      })
+    }
+
+    await get().fetchWholesalers()
   }
+
 }))
